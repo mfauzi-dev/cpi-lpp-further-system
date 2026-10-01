@@ -206,17 +206,8 @@
                                     <th>Tanggal Produksi</th>
                                     <th>Kode Batch</th>
                                     <th>Product</th>
-                                    <th>Fryer</th>
-                                    <th>Waktu Kerja</th>
-                                    <th>Suhu Setting</th>
-                                    <th>Suhu Aktual</th>
                                     <th>Suhu Pusat</th>
                                     <th>Suhu Minimum</th>
-                                    <th>Lama Pemasakan</th>
-                                    <th>TPM Minyak</th>
-                                    <th>Waktu Mulai</th>
-                                    <th>Waktu Selesai</th>
-                                    <th>Downtime</th>
                                     <th>Action</th>
 
                                 </tr>
@@ -274,70 +265,6 @@
 
                                         <td>
 
-                                            @if ($fryer->fryer !== null)
-                                                <span class="badge-value">
-
-                                                    Fryer {{ $fryer->fryer }}
-
-                                                </span>
-                                            @else
-                                                <span class="value-empty">
-                                                    -
-                                                </span>
-                                            @endif
-
-                                        </td>
-
-                                        <td>
-
-                                            @if ($fryer->productionBatch?->waktu_kerja !== null)
-                                                <span class="badge-value">
-
-                                                    {{ $fryer->productionBatch->waktu_kerja }} Menit
-
-                                                </span>
-                                            @else
-                                                <span class="value-empty">
-                                                    -
-                                                </span>
-                                            @endif
-
-                                        </td>
-
-                                        <td>
-
-                                            @if ($fryer->suhu_setting !== null)
-                                                <span class="badge-value">
-
-                                                    {{ $fryer->suhu_setting }} °C
-
-                                                </span>
-                                            @else
-                                                <span class="value-empty">
-                                                    -
-                                                </span>
-                                            @endif
-
-                                        </td>
-
-                                        <td>
-
-                                            @if ($fryer->suhu_aktual !== null)
-                                                <span class="badge-value">
-
-                                                    {{ $fryer->suhu_aktual }} °C
-
-                                                </span>
-                                            @else
-                                                <span class="value-empty">
-                                                    -
-                                                </span>
-                                            @endif
-
-                                        </td>
-
-                                        <td>
-
                                             @if ($fryer->suhu_pusat !== null)
                                                 <span class="badge-value badge-suhu-{{ $fryer->suhu_pusat_status }}">
 
@@ -358,78 +285,6 @@
                                                 <span class="badge-value">
 
                                                     {{ $fryer->suhu_minimum }} °C
-
-                                                </span>
-                                            @else
-                                                <span class="value-empty">
-                                                    -
-                                                </span>
-                                            @endif
-
-                                        </td>
-
-                                        <td>
-
-                                            @if ($fryer->lama_pemasakan !== null)
-                                                <span class="badge-value">
-
-                                                    {{ $fryer->lama_pemasakan }} Menit
-
-                                                </span>
-                                            @else
-                                                <span class="value-empty">
-                                                    -
-                                                </span>
-                                            @endif
-
-                                        </td>
-
-                                        <td>
-
-                                            @if ($fryer->tpm_minyak !== null)
-                                                <span class="badge-value">
-
-                                                    {{ $fryer->tpm_minyak }}
-
-                                                </span>
-                                            @else
-                                                <span class="value-empty">
-                                                    -
-                                                </span>
-                                            @endif
-
-                                        </td>
-
-                                        <td>
-
-                                            @if ($fryer->waktu_mulai)
-                                                {{ \Carbon\Carbon::parse($fryer->waktu_mulai)->format('H:i') }}
-                                            @else
-                                                <span class="value-empty">
-                                                    -
-                                                </span>
-                                            @endif
-
-                                        </td>
-
-                                        <td>
-
-                                            @if ($fryer->waktu_selesai)
-                                                {{ \Carbon\Carbon::parse($fryer->waktu_selesai)->format('H:i') }}
-                                            @else
-                                                <span class="value-empty">
-                                                    -
-                                                </span>
-                                            @endif
-
-                                        </td>
-
-                                        <td>
-
-                                            @if ($fryer->downtime !== null)
-                                                <span class="badge-value">
-
-                                                    {{ $fryer->downtime }}
 
                                                 </span>
                                             @else
@@ -484,7 +339,7 @@
 
                                     <tr>
 
-                                        <td colspan="16">
+                                        <td colspan="7">
 
                                             <div class="empty-state">
 

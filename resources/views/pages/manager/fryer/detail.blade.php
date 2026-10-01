@@ -241,21 +241,15 @@
 @section('content')
 
     @php
-        $suhuClass = '';
-        $isBelowMinimum = false;
+        // $fryer->suhu_pusat_status (accessor di model Fryer) sudah otomatis
+        // menyesuaikan ambang batas berdasarkan tipe_proses production batch:
+        // forming -> hijau 76,5-79,5 | non_forming & non_forming_roasted -> hijau 76,5-94
+        $suhuStatus = $fryer->suhu_pusat_status; // 'success' | 'warning' | 'danger' | null
+        $suhuClass = $suhuStatus ? 'stat-suhu-' . $suhuStatus : '';
+        $isBelowMinimum = $suhuStatus === 'danger';
 
-        if ($fryer->suhu_pusat !== null) {
-            $suhu = (float) $fryer->suhu_pusat;
-
-            if ($suhu >= 76.5 && $suhu <= 79.5) {
-                $suhuClass = 'stat-suhu-success';
-            } elseif (($suhu >= 76 && $suhu < 76.5) || ($suhu > 79.5 && $suhu <= 80)) {
-                $suhuClass = 'stat-suhu-warning';
-            } else {
-                $suhuClass = 'stat-suhu-danger';
-                $isBelowMinimum = true;
-            }
-        }
+        $tipeProses = $fryer->productionBatch->tipe_proses ?? null;
+        $tipeProsesLabel = $tipeProses ? ucwords(str_replace('_', ' ', $tipeProses)) : 'Forming';
     @endphp
 
     <div class="fryer-detail">
@@ -377,11 +371,11 @@
                         <div class="col-md-3 mb-3">
                             <div class="info-box">
                                 <div class="info-label">
-                                    Line
+                                    Tipe Proses
                                 </div>
 
                                 <div class="info-value">
-                                    {{ $fryer->line ?? ($fryer->productionBatch->line ?? '-') }}
+                                    {{ $tipeProsesLabel }}
                                 </div>
                             </div>
                         </div>

@@ -686,57 +686,6 @@
             <div class="card mb-4">
                 <div class="card-header">
                     <h4>
-                        <i class="fas fa-chart-line mr-2" style="color: var(--fry-primary);"></i>
-                        Perbandingan Suhu Antar Batch
-                    </h4>
-                </div>
-
-                <div class="card-body">
-                    @if ($chartByDate->count() > 0)
-                        <div class="zone-legend">
-                            <span><i class="zone-dot" style="background:#28a745;"></i>Hijau: Sesuai (Forming 76,5-79,5 °C /
-                                Non-Forming 76,5-94 °C)</span>
-                            <span><i class="zone-dot" style="background:#F0AD00;"></i>Kuning: Waspada (Forming 76-76,5 &amp;
-                                79,5-80 °C / Non-Forming 76-76,5 &amp; 94-95 °C)</span>
-                            <span><i class="zone-dot" style="background:#dc3545;"></i>Merah: Di Luar Batas (Forming &lt;76 /
-                                &gt;80 °C / Non-Forming &lt;76 / &gt;95 °C)</span>
-                        </div>
-
-                        @foreach ($chartByDate as $tanggal => $items)
-                            <div class="chart-item">
-                                <div class="chart-title">
-                                    <i class="fas fa-calendar-alt mr-1"></i>
-                                    {{ \Carbon\Carbon::parse($tanggal)->translatedFormat('d F Y') }}
-                                </div>
-
-                                <div class="chart-subtitle">Grafik Garis</div>
-
-                                <div class="chart-wrapper">
-                                    <canvas id="fryerChart{{ str_replace('-', '', $tanggal) }}"></canvas>
-                                </div>
-
-                                <div class="chart-subtitle">Grafik Batang</div>
-
-                                <div class="chart-wrapper">
-                                    <canvas id="fryerBar{{ str_replace('-', '', $tanggal) }}"></canvas>
-                                </div>
-                            </div>
-                        @endforeach
-                    @else
-                        <div class="empty-chart">
-                            <i class="fas fa-chart-line fa-3x mb-3"></i>
-
-                            <h6>Belum ada data grafik</h6>
-
-                            <p class="mb-0">Data suhu akan tampil setelah filter diterapkan.</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4>
                         <i class="fas fa-chart-pie mr-2" style="color: var(--fry-primary);"></i>
                         Distribusi Status Suhu Pusat
                     </h4>
@@ -782,6 +731,62 @@
                     @endif
                 </div>
             </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>
+                        <i class="fas fa-chart-line mr-2" style="color: var(--fry-primary);"></i>
+                        Perbandingan Suhu Antar Batch
+                    </h4>
+                </div>
+
+                <div class="card-body">
+                    @if ($chartByDate->count() > 0)
+                        <div class="zone-legend">
+                            <span><i class="zone-dot" style="background:#28a745;"></i>Hijau: Sesuai (Forming 76,5-79,5 °C
+                                /
+                                Non-Forming 76,5-94 °C)</span>
+                            <span><i class="zone-dot" style="background:#F0AD00;"></i>Kuning: Waspada (Forming 76-76,5
+                                &amp;
+                                79,5-80 °C / Non-Forming 76-76,5 &amp; 94-95 °C)</span>
+                            <span><i class="zone-dot" style="background:#dc3545;"></i>Merah: Di Luar Batas (Forming &lt;76
+                                /
+                                &gt;80 °C / Non-Forming &lt;76 / &gt;95 °C)</span>
+                        </div>
+
+                        @foreach ($chartByDate as $tanggal => $items)
+                            <div class="chart-item">
+                                <div class="chart-title">
+                                    <i class="fas fa-calendar-alt mr-1"></i>
+                                    {{ \Carbon\Carbon::parse($tanggal)->translatedFormat('d F Y') }}
+                                </div>
+
+                                <div class="chart-subtitle">Grafik Garis</div>
+
+                                <div class="chart-wrapper">
+                                    <canvas id="fryerChart{{ str_replace('-', '', $tanggal) }}"></canvas>
+                                </div>
+
+                                <div class="chart-subtitle">Grafik Batang</div>
+
+                                <div class="chart-wrapper">
+                                    <canvas id="fryerBar{{ str_replace('-', '', $tanggal) }}"></canvas>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="empty-chart">
+                            <i class="fas fa-chart-line fa-3x mb-3"></i>
+
+                            <h6>Belum ada data grafik</h6>
+
+                            <p class="mb-0">Data suhu akan tampil setelah filter diterapkan.</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+
 
             <div class="card mb-4">
                 <div class="card-header">

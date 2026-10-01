@@ -42,22 +42,35 @@ class Fryer extends Model
         return $this->belongsTo(ProductionBatch::class);
     }
 
+protected function suhuPusatThreshold(): array
+    {
+        $tipeProses = $this->productionBatch?->tipe_proses;
+ 
+        if (in_array($tipeProses, ['non_forming', 'non_forming_roasted'], true)) {
+            return ['low' => 76, 'greenLow' => 76.5, 'greenHigh' => 94, 'high' => 95];
+        }
+ 
+        // forming / null / default
+        return ['low' => 76, 'greenLow' => 76.5, 'greenHigh' => 79.5, 'high' => 80];
+    }
+ 
     public function getSuhuPusatStatusAttribute(): ?string
     {
         if ($this->suhu_pusat === null) {
             return null;
         }
-
+ 
+        $t = $this->suhuPusatThreshold();
         $suhu = (float) $this->suhu_pusat;
-
-        if ($suhu >= 76.5 && $suhu <= 79.5) {
+ 
+        if ($suhu >= $t['greenLow'] && $suhu <= $t['greenHigh']) {
             return 'success';
         }
-
-        if (($suhu >= 76 && $suhu < 76.5) || ($suhu > 79.5 && $suhu <= 80)) {
+ 
+        if (($suhu >= $t['low'] && $suhu < $t['greenLow']) || ($suhu > $t['greenHigh'] && $suhu <= $t['high'])) {
             return 'warning';
         }
-        
+ 
         return 'danger';
     }
 }
