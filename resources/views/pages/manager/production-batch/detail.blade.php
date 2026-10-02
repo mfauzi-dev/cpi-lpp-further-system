@@ -477,63 +477,77 @@
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-3 mb-3 mb-md-0">
-                                <div class="info-box">
-                                    <div class="info-label">
-                                        Line
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-chart-line"></i>
                                     </div>
 
-                                    <div class="info-value">
-                                        {{ $productionBatch->line ?? '-' }}
-                                    </div>
-                                </div>
-                            </div>
+                                    <div>
+                                        <div class="stat-label">
+                                            Produktifitas
+                                        </div>
 
-                            <div class="col-md-3 mb-3 mb-md-0">
-                                <div class="info-box">
-                                    <div class="info-label">
-                                        Waktu Kerja
-                                    </div>
-
-                                    <div class="info-value">
-                                        @if ($productionBatch->waktu_kerja !== null)
-                                            {{ $productionBatch->waktu_kerja }} Menit
-                                        @else
-                                            -
-                                        @endif
+                                        <div class="stat-value">
+                                            @if ($productionBatch->produktifitas !== null)
+                                                {{ number_format((float) $productionBatch->produktifitas, 2, ',', '.') }}
+                                            @else
+                                                -
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-3 mb-3 mb-md-0">
-                                <div class="info-box">
-                                    <div class="info-label">
-                                        Yield
+                            <div class="col-md-4 mt-3 mt-md-0">
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-industry"></i>
                                     </div>
 
-                                    <div class="info-value">
-                                        @if ($productionBatch->yield !== null)
-                                            {{ number_format((float) $productionBatch->yield, 2, ',', '.') }}
-                                        @else
-                                            -
-                                        @endif
+                                    <div>
+                                        <div class="stat-label">
+                                            Status Production Batch
+                                        </div>
+
+                                        <div class="stat-value">
+                                            @if ($temperatureTidakMemenuhi)
+                                                Parameter Temperature Tidak Memenuhi
+                                            @else
+                                                Data Produksi
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-3">
-                                <div class="info-box">
-                                    <div class="info-label">
-                                        % Rijek
+                            <div class="col-md-4 mt-3 mt-md-0">
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-stream"></i>
                                     </div>
 
-                                    <div class="info-value">
-                                        @if ($productionBatch->persen_rijek !== null)
-                                            {{ number_format((float) $productionBatch->persen_rijek, 2, ',', '.') }}%
-                                        @else
-                                            -
-                                        @endif
+                                    <div>
+                                        <div class="stat-label">
+                                            Tipe Proses
+                                        </div>
+
+                                        <div class="stat-value">
+                                            @php
+                                                $tipeProsesLabel = [
+                                                    'forming' => 'Forming',
+                                                    'non_forming' => 'Non Forming',
+                                                    'non_forming_roasted' => 'Non Forming Roasted',
+                                                ];
+                                            @endphp
+
+                                            @if ($productionBatch->tipe_proses)
+                                                {{ $tipeProsesLabel[$productionBatch->tipe_proses] ?? ucfirst(str_replace('_', ' ', $productionBatch->tipe_proses)) }}
+                                            @else
+                                                -
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1985,8 +1999,7 @@
                         @foreach ($productionBatch->pembekuans as $pembekuan)
                             @php
                                 $pembekuanItemTidakMemenuhi =
-                                    $pembekuan->suhu_pusat !== null &&
-                                    (float) $pembekuan->suhu_pusat >= -18;
+                                    $pembekuan->suhu_pusat !== null && (float) $pembekuan->suhu_pusat >= -18;
                             @endphp
 
                             <div class="row">

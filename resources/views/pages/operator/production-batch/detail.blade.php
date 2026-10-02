@@ -157,7 +157,7 @@
 
                     <div class="row">
 
-                        <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="col-md-3 mb-3 mb-md-0">
                             <div class="info-box">
 
                                 <div class="info-label">
@@ -171,7 +171,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="col-md-3 mb-3 mb-md-0">
                             <div class="info-box">
 
                                 <div class="info-label">
@@ -191,7 +191,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-3 mb-3 mb-md-0">
                             <div class="info-box">
 
                                 <div class="info-label">
@@ -200,6 +200,34 @@
 
                                 <div class="info-value">
                                     Production Batch
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="info-box">
+
+                                <div class="info-label">
+                                    Tipe Proses
+                                </div>
+
+                                <div class="info-value">
+                                    @php
+                                        $tipeProsesLabel = [
+                                            'forming' => 'Forming',
+                                            'non_forming' => 'Non Forming',
+                                            'non_forming_roasted' => 'Non Forming Roasted',
+                                        ];
+                                    @endphp
+
+                                    @if ($productionBatch->tipe_proses)
+                                        <span class="badge-value">
+                                            {{ $tipeProsesLabel[$productionBatch->tipe_proses] ?? ucfirst(str_replace('_', ' ', $productionBatch->tipe_proses)) }}
+                                        </span>
+                                    @else
+                                        <span class="value-empty">-</span>
+                                    @endif
                                 </div>
 
                             </div>
