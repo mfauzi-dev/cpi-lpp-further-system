@@ -154,7 +154,7 @@
         }
 
         /* Wide data-entry table — used by Pengemasan Box and Palet —
-               scrolls horizontally instead of squeezing columns. */
+                   scrolls horizontally instead of squeezing columns. */
         .pl-page .table-wide-wrap {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -184,8 +184,8 @@
         }
 
         /* Remove native spinner arrows on number inputs inside tables —
-               with right-aligned text they overlap the last digit and hide it
-               (e.g. "9600" reads as "960"). */
+                   with right-aligned text they overlap the last digit and hide it
+                   (e.g. "9600" reads as "960"). */
         .pl-page .table input[type="number"]::-webkit-outer-spin-button,
         .pl-page .table input[type="number"]::-webkit-inner-spin-button {
             -webkit-appearance: none;

@@ -14,12 +14,43 @@ class ProductionBatchController extends Controller
 {
     public function getByDate($date)
     {
-        $productionBatches = ProductionBatch::with('product')
+        $productionBatches = ProductionBatch::with([
+                'product',
+                'formings',
+                'batters',
+                'predustBreaders',
+                'hlts',
+            ])
             ->whereDate('tanggal_produksi', $date)
             ->latest('id')
             ->get();
 
         return response()->json($productionBatches->map(function ($batch) {
+
+            $proses = null;
+            $prosesNama = null;
+
+            if ($batch->tipe_proses === 'forming') {
+
+                $proses = $batch->formings->sortBy('waktu_mulai')->first();
+                $prosesNama = 'Forming';
+
+            } elseif ($batch->tipe_proses === 'non_forming') {
+
+                $proses = $batch->batters->sortBy('waktu_mulai')->first();
+                $prosesNama = 'Batter';
+
+                if (!$proses) {
+                    $proses = $batch->predustBreaders->sortBy('waktu_mulai')->first();
+                    $prosesNama = 'Predust Breader';
+                }
+
+            } elseif ($batch->tipe_proses === 'non_forming_roasted') {
+
+                $proses = $batch->hlts->sortBy('waktu_mulai')->first();
+                $prosesNama = 'HLT';
+            }
+
             return [
                 'id' => $batch->id,
                 'no_batch' => $batch->no_batch,
@@ -27,6 +58,10 @@ class ProductionBatchController extends Controller
                 'product' => $batch->product->nama ?? '-',
                 'line' => $batch->line ?? '-',
                 'waktu_kerja' => $batch->waktu_kerja,
+                'tanggal_produksi' => $batch->tanggal_produksi->format('Y-m-d'),
+                'tipe_proses' => $batch->tipe_proses,
+                'proses_nama' => $prosesNama,
+                'waktu_mulai_proses' => $proses->waktu_mulai ?? null,
             ];
         }));
     }
