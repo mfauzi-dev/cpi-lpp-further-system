@@ -428,48 +428,50 @@ class PackingLuarController extends Controller
                         'hlts',
                     ])->findOrFail($request->production_batch_id);
 
-                    $proses = null;
+                $proses = null;
 
-                    if ($productionBatch->tipe_proses === 'forming') {
+                if ($productionBatch->tipe_proses === 'forming') {
 
-                        $proses = $productionBatch->formings
-                            ->sortBy('waktu_mulai')
-                            ->first();
+                    $proses = $productionBatch->formings
+                        ->sortBy('waktu_mulai')
+                        ->first();
 
-                    } elseif ($productionBatch->tipe_proses === 'non_forming') {
+                } elseif ($productionBatch->tipe_proses === 'non_forming') {
 
-                        // salah satu dari batter / breader yang is_used = true
-                        $proses = $productionBatch->batters
-                            ->sortBy('waktu_mulai')
-                            ->first();
+                    $proses = $productionBatch->batters
+                        ->sortBy('waktu_mulai')
+                        ->first();
 
-                        if (!$proses) {
-                            $proses = $productionBatch->predustBreaders
-                                ->sortBy('waktu_mulai')
-                                ->first();
-                        }
-
-                    } elseif ($productionBatch->tipe_proses === 'non_forming_roasted') {
-
-                        $proses = $productionBatch->hlts
+                    if (!$proses) {
+                        $proses = $productionBatch->predustBreaders
                             ->sortBy('waktu_mulai')
                             ->first();
                     }
 
-                    if ($proses && !empty($proses->waktu_mulai)) {
-                        $waktuMulai = \Carbon\Carbon::parse($proses->waktu_mulai);
-                        $waktuAwalPackingLuar = \Carbon\Carbon::parse($request->waktu_awal);
+                } elseif ($productionBatch->tipe_proses === 'non_forming_roasted') {
 
-                        if ($waktuAwalPackingLuar->lt($waktuMulai)) {
-                            $waktuAwalPackingLuar->addDay();
-                        }
+                    $proses = $productionBatch->hlts
+                        ->sortBy('waktu_mulai')
+                        ->first();
+                }
 
-                        $waktuKerja = $waktuMulai->diffInMinutes($waktuAwalPackingLuar);
+                if ($proses && !empty($proses->waktu_mulai)) {
 
-                        $productionBatch->update([
-                            'waktu_kerja' => $waktuKerja,
-                        ]);
+                    $tanggal = $productionBatch->tanggal_produksi->format('Y-m-d');
+
+                    $waktuMulai = \Carbon\Carbon::parse($tanggal . ' ' . $proses->waktu_mulai);
+                    $waktuAwalPackingLuar = \Carbon\Carbon::parse($tanggal . ' ' . $request->waktu_awal);
+
+                    if ($waktuAwalPackingLuar->lt($waktuMulai)) {
+                        $waktuAwalPackingLuar->addDay();
                     }
+
+                    $waktuKerja = $waktuMulai->diffInMinutes($waktuAwalPackingLuar);
+
+                    $productionBatch->update([
+                        'waktu_kerja' => $waktuKerja,
+                    ]);
+                }
             }
 
             $packingLuar->samplings()->delete();
