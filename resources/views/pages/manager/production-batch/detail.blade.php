@@ -552,52 +552,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="stat-card">
-                                    <div class="stat-icon">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
-
-                                    <div>
-                                        <div class="stat-label">
-                                            Produktifitas
-                                        </div>
-
-                                        <div class="stat-value">
-                                            @if ($productionBatch->produktifitas !== null)
-                                                {{ number_format((float) $productionBatch->produktifitas, 2, ',', '.') }}
-                                            @else
-                                                -
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 mt-3 mt-md-0">
-                                <div class="stat-card">
-                                    <div class="stat-icon">
-                                        <i class="fas fa-industry"></i>
-                                    </div>
-
-                                    <div>
-                                        <div class="stat-label">
-                                            Status Production Batch
-                                        </div>
-
-                                        <div class="stat-value">
-                                            @if ($temperatureTidakMemenuhi)
-                                                Parameter Temperature Tidak Memenuhi
-                                            @else
-                                                Data Produksi
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
