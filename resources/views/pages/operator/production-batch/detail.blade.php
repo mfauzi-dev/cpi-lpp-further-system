@@ -2029,7 +2029,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-3 mb-3">
                                     <div class="process-card">
                                         <div class="process-label">Operator</div>
                                         <div class="process-value">
@@ -2038,7 +2038,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-3 mb-3">
                                     <div class="process-card">
                                         <div class="process-label">Line</div>
                                         <div class="process-value">
@@ -2047,7 +2047,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-3 mb-3">
                                     <div class="process-card">
                                         <div class="process-label">PIC Produksi</div>
                                         <div class="process-value">

@@ -81,6 +81,16 @@ class ProductionController extends Controller
             'processType',
         ])->latest();
 
+        if ($request->filled('no_batch')) {
+            $query->whereHas('productionBatch', function ($q) use ($request) {
+                $q->where(
+                    'no_batch',
+                    'like',
+                    '%' . $request->no_batch . '%'
+                );
+            });
+        }
+
         if ($request->filled('process_type_id')) {
             $query->where('process_type_id', $request->process_type_id);
         }
