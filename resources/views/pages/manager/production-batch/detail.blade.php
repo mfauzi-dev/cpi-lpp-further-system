@@ -362,15 +362,16 @@
 
         <div class="section-body">
             @php
+                // Fryer: pakai accessor $fryer->suhu_pusat_status dari model,
+                // yang sudah otomatis menyesuaikan threshold berdasarkan tipe_proses
+                // (forming vs non_forming / non_forming_roasted).
+                // "Tidak memenuhi" = status apa pun selain 'success' (hijau).
                 $fryerTidakMemenuhi = false;
                 $pembekuanTidakMemenuhi = false;
 
                 if ($productionBatch->fryers && $productionBatch->fryers->count()) {
                     foreach ($productionBatch->fryers as $fryer) {
-                        if (
-                            $fryer->suhu_pusat !== null &&
-                            ((float) $fryer->suhu_pusat < 76.5 || (float) $fryer->suhu_pusat > 79.5)
-                        ) {
+                        if ($fryer->suhu_pusat_status !== null && $fryer->suhu_pusat_status !== 'success') {
                             $fryerTidakMemenuhi = true;
                             break;
                         }
@@ -1616,22 +1617,11 @@
                     @if ($productionBatch->fryers->count())
 
                         @foreach ($productionBatch->fryers as $fryer)
-                            @php
-                                $fryerSuhuStatus = null;
-
-                                if ($fryer->suhu_pusat !== null) {
-                                    $suhuPusat = (float) $fryer->suhu_pusat;
-
-                                    if ($suhuPusat >= 76.5 && $suhuPusat <= 79.5) {
-                                        $fryerSuhuStatus = 'success';
-                                    } elseif ($suhuPusat >= 76 && $suhuPusat <= 80) {
-                                        $fryerSuhuStatus = 'warning';
-                                    } else {
-                                        $fryerSuhuStatus = 'danger';
-                                    }
-                                }
-                            @endphp
-
+                            {{-- Status suhu pusat (success/warning/danger) sepenuhnya diambil
+                                 dari accessor model Fryer::getSuhuPusatStatusAttribute(),
+                                 yang otomatis menyesuaikan ambang batas sesuai tipe_proses
+                                 pada ProductionBatch terkait. Tidak ada logika threshold
+                                 di-duplikasi di view. --}}
                             <div class="row">
 
                                 <div class="col-md-3 mb-3">
@@ -1657,8 +1647,8 @@
                                         <div class="process-label">Suhu Pusat</div>
                                         <div
                                             class="process-value
-                                                {{ $fryerSuhuStatus === 'danger' ? 'text-alert' : '' }}
-                                                {{ $fryerSuhuStatus === 'warning' ? 'text-warning' : '' }}">
+                                                {{ $fryer->suhu_pusat_status === 'danger' ? 'text-alert' : '' }}
+                                                {{ $fryer->suhu_pusat_status === 'warning' ? 'text-warning' : '' }}">
                                             {{ $fryer->suhu_pusat ?? '-' }}
                                         </div>
                                     </div>

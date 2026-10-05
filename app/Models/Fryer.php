@@ -42,7 +42,7 @@ class Fryer extends Model
         return $this->belongsTo(ProductionBatch::class);
     }
 
-protected function suhuPusatThreshold(): array
+    protected function suhuPusatThreshold(): array
     {
         $tipeProses = $this->productionBatch?->tipe_proses;
  
