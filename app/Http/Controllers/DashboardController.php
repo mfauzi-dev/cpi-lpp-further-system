@@ -66,26 +66,66 @@ class DashboardController extends Controller
     public function managerDashboard(Request $request)
     {
         $date = $request->input('date', now()->format('Y-m-d'));
-
-        $productionBatches = ProductionBatch::with('product')
+ 
+        $productionBatches = ProductionBatch::with(['product', 'fryers', 'pembekuans'])
             ->whereDate('tanggal_produksi', $date)
             ->latest('id')
             ->get();
-
+ 
+        $isBatchCompliant = function (ProductionBatch $batch): bool {
+            $fryerOk = $batch->fryers->every(function ($fryer) {
+                return $fryer->suhu_pusat_status === null
+                    || $fryer->suhu_pusat_status === 'success';
+            });
+ 
+            $pembekuanOk = $batch->pembekuans->every(function ($pembekuan) {
+                return $pembekuan->suhu_pusat === null
+                    || (float) $pembekuan->suhu_pusat <= -18;
+            });
+ 
+            return $fryerOk && $pembekuanOk;
+        };
+ 
         $totalBatch = $productionBatches->count();
-
+ 
         $totalOutput = $productionBatches->sum(function ($batch) {
             return (float) $batch->yield;
         });
-
+ 
         $averageYield = $productionBatches->whereNotNull('yield')->avg('yield');
-
+ 
         $averageRijek = $productionBatches->whereNotNull('persen_rijek')->avg('persen_rijek');
-
+ 
         $averageProduktifitas = $productionBatches
             ->whereNotNull('produktifitas')
             ->avg('produktifitas');
-
+ 
+        // ===== Compliance Suhu: Total Berhasil vs Total Rijek =====
+        $totalBerhasil = 0;
+        $totalRijek = 0;
+ 
+        foreach ($productionBatches as $batch) {
+            $compliant = $isBatchCompliant($batch);
+ 
+            // taruh di attribute dinamis biar bisa dipakai lagi di tabel
+            // "Batch Terbaru" tanpa query / hitung ulang
+            $batch->setAttribute('is_compliant', $compliant);
+ 
+            if ($compliant) {
+                $totalBerhasil++;
+            } else {
+                $totalRijek++;
+            }
+        }
+ 
+        $persentaseBerhasil = $totalBatch > 0
+            ? round(($totalBerhasil / $totalBatch) * 100, 1)
+            : 0;
+ 
+        $persentaseRijek = $totalBatch > 0
+            ? round(($totalRijek / $totalBatch) * 100, 1)
+            : 0;
+ 
         $processes = [
             'Bowl Cutter' => BowlCutter::class,
             'Grinder' => Grinder::class,
@@ -102,65 +142,78 @@ class DashboardController extends Controller
             'Packing Luar' => PackingLuar::class,
             'Kemasan Rijek' => KemasanRijek::class,
         ];
-
+ 
+        // ikon Font Awesome per proses — biar tampilan grid proses di dashboard
+        // nggak cuma teks, enak dipindai manager sekilas lihat.
+        $processIcons = [
+            'Bowl Cutter' => 'fa-utensils',
+            'Grinder' => 'fa-cogs',
+            'Preparasi FLA' => 'fa-temperature-low',
+            'Tumbler' => 'fa-sync-alt',
+            'Mixing' => 'fa-blender',
+            'Forming' => 'fa-shapes',
+            'Batter' => 'fa-fill-drip',
+            'HLT' => 'fa-hot-tub',
+            'Predust Breader' => 'fa-bread-slice',
+            'Fryer' => 'fa-fire',
+            'Pembekuan' => 'fa-snowflake',
+            'Packing Dalam' => 'fa-box',
+            'Packing Luar' => 'fa-boxes',
+            'Kemasan Rijek' => 'fa-exclamation-triangle',
+        ];
+ 
+        $batchIds = $productionBatches->pluck('id');
+ 
         $processStatus = [];
-
+ 
         foreach ($processes as $name => $model) {
-            $count = $model::whereIn(
-                'production_batch_id',
-                $productionBatches->pluck('id')
-            )->count();
-
+            $count = $model::whereIn('production_batch_id', $batchIds)->count();
+ 
             $processStatus[] = [
                 'name' => $name,
+                'icon' => $processIcons[$name] ?? 'fa-industry',
                 'count' => $count,
                 'status' => $count > 0 ? 'Selesai' : 'Belum Diinput',
             ];
         }
-
+ 
         $totalProcess = count($processes);
-
+ 
         $completedProcess = collect($processStatus)
             ->where('count', '>', 0)
             ->count();
-
+ 
         $pendingProcess = $totalProcess - $completedProcess;
-
-        $kemasanRijekToday = KemasanRijek::whereIn(
-            'production_batch_id',
-            $productionBatches->pluck('id')
-        )->count();
-
-        $metalDetectorToday = MetalDetector::whereIn(
-            'production_batch_id',
-            $productionBatches->pluck('id')
-        )->count();
-
+ 
+        $kemasanRijekToday = KemasanRijek::whereIn('production_batch_id', $batchIds)->count();
+ 
+        $metalDetectorToday = MetalDetector::whereIn('production_batch_id', $batchIds)->count();
+ 
+        // ===== Tren 7 hari terakhir: jumlah batch, output, & compliance suhu =====
         $outputChart = [];
-
+ 
         for ($i = 6; $i >= 0; $i--) {
             $chartDate = Carbon::parse($date)->subDays($i)->format('Y-m-d');
-
-            $chartBatches = ProductionBatch::whereDate(
-                'tanggal_produksi',
-                $chartDate
-            )->get();
-
+ 
+            $chartBatches = ProductionBatch::with(['fryers', 'pembekuans'])
+                ->whereDate('tanggal_produksi', $chartDate)
+                ->get();
+ 
+            $chartBerhasil = $chartBatches->filter($isBatchCompliant)->count();
+ 
             $outputChart[] = [
                 'date' => Carbon::parse($chartDate)->format('d M'),
                 'batch' => $chartBatches->count(),
                 'output' => $chartBatches->sum(function ($batch) {
                     return (float) $batch->yield;
                 }),
+                'berhasil' => $chartBerhasil,
+                'rijek' => $chartBatches->count() - $chartBerhasil,
             ];
         }
-
-        $recentProduction = ProductionBatch::with('product')
-            ->whereDate('tanggal_produksi', $date)
-            ->latest('id')
-            ->limit(10)
-            ->get();
-
+ 
+        $recentProduction = $productionBatches->take(10);
+ 
         return view('pages.dashboard.manager', compact(
             'date',
             'totalBatch',
@@ -168,6 +221,10 @@ class DashboardController extends Controller
             'averageYield',
             'averageRijek',
             'averageProduktifitas',
+            'totalBerhasil',
+            'totalRijek',
+            'persentaseBerhasil',
+            'persentaseRijek',
             'totalProcess',
             'completedProcess',
             'pendingProcess',

@@ -38,15 +38,16 @@
                 </form>
             </div>
 
+            {{-- ===== KPI UTAMA: Batch / Berhasil / Rijek (Compliance Suhu) ===== --}}
             <div class="row">
 
-                <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="col-lg-4 col-md-4 col-sm-6">
                     <div class="card dashboard-card dashboard-card-primary">
                         <div class="card-body">
                             <div class="dashboard-card-top">
                                 <div>
                                     <div class="dashboard-label">
-                                        PRODUCTION BATCH
+                                        TOTAL BATCH
                                     </div>
 
                                     <div class="dashboard-value">
@@ -54,9 +55,7 @@
                                     </div>
                                 </div>
 
-                                <div class="dashboard-icon">
-                                    <i class="fas fa-layer-group"></i>
-                                </div>
+                                <div class="dashboard-icon dashboard-icon-emoji">📦</div>
                             </div>
 
                             <div class="dashboard-caption">
@@ -66,7 +65,60 @@
                     </div>
                 </div>
 
-                <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="col-lg-4 col-md-4 col-sm-6">
+                    <div class="card dashboard-card dashboard-card-success">
+                        <div class="card-body">
+                            <div class="dashboard-card-top">
+                                <div>
+                                    <div class="dashboard-label">
+                                        TOTAL BERHASIL
+                                    </div>
+
+                                    <div class="dashboard-value">
+                                        {{ number_format($totalBerhasil, 0, ',', '.') }}
+                                    </div>
+                                </div>
+
+                                <div class="dashboard-icon dashboard-icon-emoji dashboard-icon-success">✅</div>
+                            </div>
+
+                            <div class="dashboard-caption">
+                                {{ number_format($persentaseBerhasil, 1, ',', '.') }}% dari total batch
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 col-sm-6">
+                    <div class="card dashboard-card dashboard-card-danger">
+                        <div class="card-body">
+                            <div class="dashboard-card-top">
+                                <div>
+                                    <div class="dashboard-label">
+                                        TOTAL RIJEK
+                                    </div>
+
+                                    <div class="dashboard-value">
+                                        {{ number_format($totalRijek, 0, ',', '.') }}
+                                    </div>
+                                </div>
+
+                                <div class="dashboard-icon dashboard-icon-emoji dashboard-icon-danger">❌</div>
+                            </div>
+
+                            <div class="dashboard-caption">
+                                {{ number_format($persentaseRijek, 1, ',', '.') }}% — suhu di luar ambang batas
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {{-- ===== KPI SEKUNDER: Output / Yield / Rijek Produk ===== --}}
+            <div class="row">
+
+                <div class="col-lg-4 col-md-4 col-sm-6">
                     <div class="card dashboard-card dashboard-card-output">
                         <div class="card-body">
                             <div class="dashboard-card-top">
@@ -80,9 +132,7 @@
                                     </div>
                                 </div>
 
-                                <div class="dashboard-icon">
-                                    <i class="fas fa-weight-hanging"></i>
-                                </div>
+                                <div class="dashboard-icon dashboard-icon-emoji">⚖️</div>
                             </div>
 
                             <div class="dashboard-caption">
@@ -92,7 +142,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="col-lg-4 col-md-4 col-sm-6">
                     <div class="card dashboard-card dashboard-card-yield">
                         <div class="card-body">
                             <div class="dashboard-card-top">
@@ -106,9 +156,7 @@
                                     </div>
                                 </div>
 
-                                <div class="dashboard-icon">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
+                                <div class="dashboard-icon dashboard-icon-emoji">📈</div>
                             </div>
 
                             <div class="dashboard-caption">
@@ -118,13 +166,13 @@
                     </div>
                 </div>
 
-                <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="col-lg-4 col-md-4 col-sm-6">
                     <div class="card dashboard-card dashboard-card-warning">
                         <div class="card-body">
                             <div class="dashboard-card-top">
                                 <div>
                                     <div class="dashboard-label">
-                                        AVERAGE RIJEK
+                                        AVERAGE RIJEK PRODUK
                                     </div>
 
                                     <div class="dashboard-value">
@@ -132,13 +180,11 @@
                                     </div>
                                 </div>
 
-                                <div class="dashboard-icon dashboard-icon-warning">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </div>
+                                <div class="dashboard-icon dashboard-icon-emoji dashboard-icon-warning">⚠️</div>
                             </div>
 
                             <div class="dashboard-caption">
-                                Rata-rata rijek production batch
+                                Rata-rata persen rijek production batch
                             </div>
                         </div>
                     </div>
@@ -154,20 +200,28 @@
                         <div class="card-header">
                             <div>
                                 <h4>
-                                    <i class="fas fa-chart-line mr-2"></i>
-                                    Produksi 7 Hari
+                                    <span class="dashboard-panel-emoji">🥧</span>
+                                    Compliance Suhu
                                 </h4>
 
                                 <span>
-                                    Berdasarkan tanggal Production Batch
+                                    Distribusi Berhasil/Rijek, tanggal {{ \Carbon\Carbon::parse($date)->format('d M Y') }}
                                 </span>
                             </div>
                         </div>
 
                         <div class="card-body">
-                            <div class="chart-wrapper">
-                                <canvas id="productionChart"></canvas>
-                            </div>
+                            @if ($totalBatch > 0)
+                                <div class="chart-wrapper">
+                                    <canvas id="productionChart"></canvas>
+                                </div>
+                            @else
+                                <div class="empty-state text-center">
+                                    <div class="empty-state-emoji">🥧</div>
+                                    <h6>Belum ada data batch</h6>
+                                    <p>Belum ada production batch pada tanggal ini.</p>
+                                </div>
+                            @endif
                         </div>
 
                     </div>
@@ -179,7 +233,7 @@
                         <div class="card-header">
                             <div>
                                 <h4>
-                                    <i class="fas fa-tasks mr-2"></i>
+                                    <span class="dashboard-panel-emoji">🧭</span>
                                     Status Proses
                                 </h4>
 
@@ -194,9 +248,7 @@
                             <div class="status-summary">
 
                                 <div class="status-summary-item">
-                                    <div class="status-summary-icon success">
-                                        <i class="fas fa-check"></i>
-                                    </div>
+                                    <div class="status-summary-icon success">✅</div>
 
                                     <div>
                                         <strong>{{ $completedProcess }}</strong>
@@ -205,9 +257,7 @@
                                 </div>
 
                                 <div class="status-summary-item">
-                                    <div class="status-summary-icon warning">
-                                        <i class="fas fa-clock"></i>
-                                    </div>
+                                    <div class="status-summary-icon warning">⏳</div>
 
                                     <div>
                                         <strong>{{ $pendingProcess }}</strong>
@@ -238,102 +288,6 @@
 
             </div>
 
-            <div class="card dashboard-panel">
-
-                <div class="card-header">
-                    <div>
-                        <h4>
-                            <i class="fas fa-industry mr-2"></i>
-                            Monitoring Proses Produksi
-                        </h4>
-
-                        <span>
-                            Status input proses berdasarkan Production Batch tanggal
-                            {{ \Carbon\Carbon::parse($date)->format('d M Y') }}
-                        </span>
-                    </div>
-                </div>
-
-                <div class="card-body p-0">
-
-                    <div class="table-responsive dashboard-table-wrapper">
-
-                        <table class="table dashboard-table mb-0">
-
-                            <thead>
-                                <tr>
-                                    <th width="60">No</th>
-                                    <th>Proses</th>
-                                    <th width="140">Jumlah Input</th>
-                                    <th width="180">Status</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-
-                                @forelse($processStatus as $index => $process)
-                                    <tr>
-                                        <td>
-                                            {{ $index + 1 }}
-                                        </td>
-
-                                        <td>
-                                            <div class="process-name">
-                                                {{ $process['name'] }}
-                                            </div>
-                                        </td>
-
-                                        <td>
-                                            <strong>
-                                                {{ number_format($process['count'], 0, ',', '.') }}
-                                            </strong>
-                                            record
-                                        </td>
-
-                                        <td>
-                                            @if ($process['count'] > 0)
-                                                <span class="status-badge status-success">
-                                                    <i class="fas fa-check-circle mr-1"></i>
-                                                    Selesai
-                                                </span>
-                                            @else
-                                                <span class="status-badge status-warning">
-                                                    <i class="fas fa-clock mr-1"></i>
-                                                    Belum Diinput
-                                                </span>
-                                            @endif
-                                        </td>
-                                    </tr>
-
-                                @empty
-
-                                    <tr>
-                                        <td colspan="4" class="text-center py-5">
-
-                                            <div class="empty-state">
-                                                <i class="fas fa-industry"></i>
-
-                                                <h6>Belum ada data proses</h6>
-
-                                                <p>
-                                                    Belum terdapat data proses pada tanggal ini.
-                                                </p>
-                                            </div>
-
-                                        </td>
-                                    </tr>
-                                @endforelse
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </div>
-
             <div class="row">
 
                 <div class="col-lg-5">
@@ -343,7 +297,7 @@
                         <div class="card-header">
                             <div>
                                 <h4>
-                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    <span class="dashboard-panel-emoji">📦</span>
                                     Kemasan Rijek
                                 </h4>
 
@@ -357,9 +311,7 @@
 
                             <div class="rijek-box">
 
-                                <div class="rijek-icon">
-                                    <i class="fas fa-box-open"></i>
-                                </div>
+                                <div class="rijek-icon">📦</div>
 
                                 <div>
                                     <div class="rijek-label">
@@ -386,7 +338,7 @@
                         <div class="card-header">
                             <div>
                                 <h4>
-                                    <i class="fas fa-history mr-2"></i>
+                                    <span class="dashboard-panel-emoji">🕒</span>
                                     Production Batch Terbaru
                                 </h4>
 
@@ -408,6 +360,7 @@
                                             <th>Product</th>
                                             <th>Line</th>
                                             <th>Yield</th>
+                                            <th>Status</th>
                                         </tr>
                                     </thead>
 
@@ -438,12 +391,20 @@
                                                     @endif
                                                 </td>
 
+                                                <td>
+                                                    @if ($batch->is_compliant)
+                                                        <span class="status-badge status-success">✅ Berhasil</span>
+                                                    @else
+                                                        <span class="status-badge status-danger">❌ Rijek</span>
+                                                    @endif
+                                                </td>
+
                                             </tr>
 
                                         @empty
 
                                             <tr>
-                                                <td colspan="4" class="text-center py-4 text-muted">
+                                                <td colspan="5" class="text-center py-4 text-muted">
                                                     Belum ada Production Batch.
                                                 </td>
                                             </tr>
@@ -476,6 +437,8 @@
             --dashboard-primary-light: #E8F0EE;
             --dashboard-accent: #D98C3D;
             --dashboard-accent-light: #FFF3E6;
+            --dashboard-danger: #dc3545;
+            --dashboard-danger-light: #FBE4E4;
             --dashboard-border: #E3E7E1;
             --dashboard-text: #1F2A24;
             --dashboard-muted: #5B6A62;
@@ -539,6 +502,22 @@
             border-left: 4px solid var(--dashboard-primary);
         }
 
+        .dashboard-card-success {
+            border-left: 4px solid #28a745;
+        }
+
+        .dashboard-card-success .dashboard-value {
+            color: #1e7a34;
+        }
+
+        .dashboard-card-danger {
+            border-left: 4px solid var(--dashboard-danger);
+        }
+
+        .dashboard-card-danger .dashboard-value {
+            color: var(--dashboard-danger);
+        }
+
         .dashboard-card-output {
             border-left: 4px solid #28665A;
         }
@@ -596,6 +575,20 @@
             flex-shrink: 0;
         }
 
+        /* ikon emoji — ukuran lebih besar biar kerasa "ilustrasi", bukan teks biasa */
+        .dashboard-icon-emoji {
+            font-size: 24px;
+            background: var(--dashboard-soft);
+        }
+
+        .dashboard-icon-success {
+            background: #E6F4EA;
+        }
+
+        .dashboard-icon-danger {
+            background: var(--dashboard-danger-light);
+        }
+
         .dashboard-card-output .dashboard-icon {
             background: #EDF4F1;
             color: #28665A;
@@ -638,10 +631,13 @@
             color: var(--dashboard-text);
             font-size: 15px;
             font-weight: 700;
+            display: flex;
+            align-items: center;
         }
 
-        .dashboard-panel .card-header h4 i {
-            color: var(--dashboard-primary);
+        .dashboard-panel-emoji {
+            margin-right: 8px;
+            font-size: 16px;
         }
 
         .dashboard-panel .card-header span {
@@ -673,16 +669,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 18px;
         }
 
         .status-summary-icon.success {
             background: var(--dashboard-primary-light);
-            color: var(--dashboard-primary);
         }
 
         .status-summary-icon.warning {
             background: var(--dashboard-accent-light);
-            color: var(--dashboard-accent);
         }
 
         .status-summary-item strong {
@@ -758,6 +753,13 @@
         .process-name {
             font-weight: 600;
             color: var(--dashboard-text);
+            display: flex;
+            align-items: center;
+        }
+
+        .process-emoji {
+            margin-right: 8px;
+            font-size: 16px;
         }
 
         .status-badge {
@@ -779,6 +781,11 @@
             color: #B86F20;
         }
 
+        .status-danger {
+            background: var(--dashboard-danger-light);
+            color: #A4303F;
+        }
+
         .rijek-box {
             display: flex;
             align-items: center;
@@ -798,7 +805,7 @@
             justify-content: center;
             background: var(--dashboard-accent-light);
             color: var(--dashboard-accent);
-            font-size: 20px;
+            font-size: 24px;
             flex-shrink: 0;
         }
 
@@ -818,9 +825,8 @@
             padding: 15px;
         }
 
-        .empty-state i {
+        .empty-state-emoji {
             font-size: 35px;
-            color: #B7C2BC;
             margin-bottom: 10px;
         }
 
@@ -865,48 +871,55 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const outputChartData = @json($outputChart);
-
-        const chartLabels = outputChartData.map(item => item.date);
-        const chartProduction = outputChartData.map(item => item.production);
+        // Compliance suhu untuk tanggal yang dipilih saja (bukan tren 7 hari)
+        const complianceValues = [{{ $totalBerhasil }}, {{ $totalRijek }}];
+        const complianceLabels = ['Berhasil', 'Rijek'];
 
         const ctx = document.getElementById('productionChart');
 
-        new Chart(ctx, {
-            type: 'line',
-
-            data: {
-                labels: chartLabels,
-
-                datasets: [{
-                    label: 'Jumlah Batch',
-                    data: chartProduction,
-                    borderWidth: 2,
-                    tension: 0.35,
-                    fill: false
-                }]
-            },
-
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-
-                plugins: {
-                    legend: {
-                        display: true
-                    }
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: complianceLabels,
+                    datasets: [{
+                        data: complianceValues,
+                        backgroundColor: ['#28a745', '#dc3545'],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 3,
+                        hoverOffset: 6
+                    }]
                 },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 18
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const total = complianceValues.reduce((a, b) => a + b, 0);
+                                    const pct = total > 0 ? (value / total) * 100 : 0;
 
-                scales: {
-                    y: {
-                        beginAtZero: true,
-
-                        ticks: {
-                            precision: 0
+                                    return context.label + ': ' + value + ' batch (' +
+                                        pct.toLocaleString('id-ID', {
+                                            minimumFractionDigits: 1,
+                                            maximumFractionDigits: 1
+                                        }) + '%)';
+                                }
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
     </script>
 @endpush
