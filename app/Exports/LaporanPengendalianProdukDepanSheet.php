@@ -39,8 +39,20 @@ class LaporanPengendalianProdukDepanSheet implements
     public function columnWidths(): array
     {
         return [
-            'A' => 15, 'B' => 15, 'C' => 15, 'D' => 15, 'E' => 15, 'F' => 15, 'G' => 15,
-            'H' => 15, 'I' => 15, 'J' => 15, 'K' => 15, 'L' => 15, 'M' => 15, 'N' => 15,
+            'A' => 15,
+            'B' => 15,
+            'C' => 15,
+            'D' => 15,
+            'E' => 15,
+            'F' => 15,
+            'G' => 15,
+            'H' => 15,
+            'I' => 15,
+            'J' => 15,
+            'K' => 15,
+            'L' => 15,
+            'M' => 15,
+            'N' => 15,
         ];
     }
 
@@ -59,18 +71,50 @@ class LaporanPengendalianProdukDepanSheet implements
                 $row = $this->buildBahanBaku($sheet, $row);
 
                 $sections = [
-                    ['title' => 'SUHU RUANG', 'data' => $this->suhuRuangs()],
-                    ['title' => 'BOWL CUTTER', 'data' => $this->bowlCutters()],
-                    ['title' => 'GRINDER', 'data' => $this->grinders()],
-                    ['title' => 'MIXING', 'data' => $this->mixings()],
-                    ['title' => 'PREPARASI FLA', 'data' => $this->preparasiFlas()],
-                    ['title' => 'TUMBLER', 'data' => $this->tumblers()],
-                    ['title' => 'FORMING', 'data' => $this->formings()],
-                    ['title' => 'BATTER', 'data' => $this->batters()],
-                    ['title' => 'PREDUST BREADER', 'data' => $this->predustBreaders()],
-                    ['title' => 'FRYER', 'data' => $this->fryers()],
-                    ['title' => 'HLT', 'data' => $this->hlts()],
-                    ['title' => 'METAL DETECTOR', 'data' => $this->metalDetectors()],
+                    [
+                        'title' => 'SUHU RUANG',
+                        'data' => $this->suhuRuangs()
+                    ],
+                    [
+                        'title' => 'BOWL CUTTER',
+                        'data' => $this->bowlCutters()
+                    ],
+                    [
+                        'title' => 'GRINDER',
+                        'data' => $this->grinders()
+                    ],
+                    [
+                        'title' => 'MIXING',
+                        'data' => $this->mixings()
+                    ],
+                    [
+                        'title' => 'PREPARASI FLA',
+                        'data' => $this->preparasiFlas()
+                    ],
+                    [
+                        'title' => 'TUMBLER',
+                        'data' => $this->tumblers()
+                    ],
+                    [
+                        'title' => 'FORMING',
+                        'data' => $this->formings()
+                    ],
+                    [
+                        'title' => 'BATTER',
+                        'data' => $this->batters()
+                    ],
+                    [
+                        'title' => 'PREDUST BREADER',
+                        'data' => $this->predustBreaders()
+                    ],
+                    [
+                        'title' => 'FRYER',
+                        'data' => $this->fryers()
+                    ],
+                    [
+                        'title' => 'HLT',
+                        'data' => $this->hlts()
+                    ],
                 ];
 
                 foreach ($sections as $section) {
@@ -244,6 +288,7 @@ class LaporanPengendalianProdukDepanSheet implements
     protected function buildBahanBaku($sheet, int $row): int
     {
         $this->sectionTitle($sheet, $row, 'BAHAN - BAHAN BAKU', 'A', 'N');
+
         $row++;
 
         $spans = [
@@ -268,13 +313,16 @@ class LaporanPengendalianProdukDepanSheet implements
         }
 
         $this->styleRow($sheet, $row, 12, true);
+
         $sheet->getRowDimension($row)->setRowHeight(28);
+
         $row++;
 
         $productions = $this->productionBatch->productions;
 
         if ($productions->isEmpty()) {
             $this->emptyBlockRow($sheet, $row, 'A', 'N');
+
             $row++;
 
             return $row + 1;
@@ -288,7 +336,9 @@ class LaporanPengendalianProdukDepanSheet implements
                 $sheet->setCellValue("A{$row}", 'Tidak ada detail');
 
                 $this->styleRow($sheet, $row, 12, true);
+
                 $sheet->getRowDimension($row)->setRowHeight(26);
+
                 $row++;
             } else {
                 foreach ($details as $detail) {
@@ -307,7 +357,9 @@ class LaporanPengendalianProdukDepanSheet implements
                     }
 
                     $this->styleRow($sheet, $row, 12, false);
+
                     $sheet->getRowDimension($row)->setRowHeight(24);
+
                     $row++;
                 }
             }
@@ -350,6 +402,7 @@ class LaporanPengendalianProdukDepanSheet implements
                 ->setVertical(Alignment::VERTICAL_CENTER);
 
             $sheet->getRowDimension($row)->setRowHeight(28);
+
             $row++;
         }
 
@@ -383,6 +436,7 @@ class LaporanPengendalianProdukDepanSheet implements
             ->setVertical(Alignment::VERTICAL_CENTER);
 
         $sheet->getRowDimension($row)->setRowHeight(30);
+
         $row++;
 
         return $row + 1;
@@ -396,6 +450,7 @@ class LaporanPengendalianProdukDepanSheet implements
         array $rows
     ): int {
         $this->sectionTitle($sheet, $row, $title, 'A', 'N');
+
         $row++;
 
         $spans = $this->distributeColumns(count($columns));
@@ -411,11 +466,14 @@ class LaporanPengendalianProdukDepanSheet implements
         }
 
         $this->styleRow($sheet, $row, 11, true);
+
         $sheet->getRowDimension($row)->setRowHeight(28);
+
         $row++;
 
         if (empty($rows)) {
             $this->emptyBlockRow($sheet, $row, 'A', 'N');
+
             $row++;
 
             return $row + 1;
@@ -433,7 +491,9 @@ class LaporanPengendalianProdukDepanSheet implements
             }
 
             $this->styleRow($sheet, $row, 11, false);
+
             $sheet->getRowDimension($row)->setRowHeight(26);
+
             $row++;
         }
 
@@ -443,6 +503,7 @@ class LaporanPengendalianProdukDepanSheet implements
     protected function distributeColumns(int $n): array
     {
         $letters = range('A', 'N');
+
         $n = max(1, min($n, 14));
 
         $base = intdiv(14, $n);
@@ -500,7 +561,11 @@ class LaporanPengendalianProdukDepanSheet implements
         string $endCol
     ): void {
         $sheet->mergeCells("{$startCol}{$row}:{$endCol}{$row}");
-        $sheet->setCellValue("{$startCol}{$row}", 'Tidak ada data');
+
+        $sheet->setCellValue(
+            "{$startCol}{$row}",
+            'Tidak ada data'
+        );
 
         $sheet->getStyle("{$startCol}{$row}:{$endCol}{$row}")
             ->getFont()
@@ -523,7 +588,14 @@ class LaporanPengendalianProdukDepanSheet implements
 
     protected function buildKemasanRijekBlock($sheet, int $row): int
     {
-        $this->sectionTitle($sheet, $row, 'KEMASAN RIJEK', 'A', 'N');
+        $this->sectionTitle(
+            $sheet,
+            $row,
+            'KEMASAN RIJEK',
+            'A',
+            'N'
+        );
+
         $row++;
 
         $rijek = $this->productionBatch->kemasanRijeks->first();
@@ -532,42 +604,64 @@ class LaporanPengendalianProdukDepanSheet implements
         $sheet->setCellValue("A{$row}", 'KATEGORI');
 
         $sheet->mergeCells("H{$row}:N{$row}");
-        $sheet->setCellValue("H{$row}", 'COOKING / PACKING (Kg)');
+        $sheet->setCellValue(
+            "H{$row}",
+            'COOKING / PACKING (Kg)'
+        );
 
         $this->styleRow($sheet, $row, 12, true);
+
         $sheet->getRowDimension($row)->setRowHeight(28);
+
         $row++;
 
         if (!$rijek) {
-            $this->emptyBlockRow($sheet, $row, 'A', 'N');
+            $this->emptyBlockRow(
+                $sheet,
+                $row,
+                'A',
+                'N'
+            );
+
             $row++;
 
             return $row + 1;
         }
 
         foreach ($this->kemasanRijekCategories() as $category) {
-            $value = $this->number($rijek->{$category['cooking']} ?? 0)
-                . ' / '
-                . $this->number($rijek->{$category['packing']} ?? 0)
-                . ' Kg';
+            $value = $this->number(
+                $rijek->{$category['cooking']} ?? 0
+            ) . ' / ' .
+            $this->number(
+                $rijek->{$category['packing']} ?? 0
+            ) . ' Kg';
 
             if (
-                isset($category['note_cooking'], $category['note_packing'])
+                isset(
+                    $category['note_cooking'],
+                    $category['note_packing']
+                )
             ) {
-                $noteCooking = $rijek->{$category['note_cooking']} ?? null;
-                $notePacking = $rijek->{$category['note_packing']} ?? null;
+                $noteCooking =
+                    $rijek->{$category['note_cooking']} ?? null;
+
+                $notePacking =
+                    $rijek->{$category['note_packing']} ?? null;
 
                 if ($noteCooking || $notePacking) {
-                    $value .= ' ('
-                        . ($noteCooking ?: '-')
-                        . ' / '
-                        . ($notePacking ?: '-')
-                        . ')';
+                    $value .= ' (' .
+                        ($noteCooking ?: '-') .
+                        ' / ' .
+                        ($notePacking ?: '-') .
+                        ')';
                 }
             }
 
             $sheet->mergeCells("A{$row}:G{$row}");
-            $sheet->setCellValue("A{$row}", $category['label']);
+            $sheet->setCellValue(
+                "A{$row}",
+                $category['label']
+            );
 
             $sheet->mergeCells("H{$row}:N{$row}");
             $sheet->setCellValue("H{$row}", $value);
@@ -593,6 +687,7 @@ class LaporanPengendalianProdukDepanSheet implements
                 ->setVertical(Alignment::VERTICAL_CENTER);
 
             $sheet->getRowDimension($row)->setRowHeight(24);
+
             $row++;
         }
 
@@ -603,14 +698,27 @@ class LaporanPengendalianProdukDepanSheet implements
     {
         $leftStart = 'A';
         $leftEnd = 'F';
+
         $rightStart = 'I';
         $rightEnd = 'N';
 
-        $sheet->mergeCells("{$leftStart}{$row}:{$leftEnd}{$row}");
-        $sheet->setCellValue("{$leftStart}{$row}", 'Dibuat Oleh');
+        $sheet->mergeCells(
+            "{$leftStart}{$row}:{$leftEnd}{$row}"
+        );
 
-        $sheet->mergeCells("{$rightStart}{$row}:{$rightEnd}{$row}");
-        $sheet->setCellValue("{$rightStart}{$row}", 'Diperiksa Oleh');
+        $sheet->setCellValue(
+            "{$leftStart}{$row}",
+            'Dibuat Oleh'
+        );
+
+        $sheet->mergeCells(
+            "{$rightStart}{$row}:{$rightEnd}{$row}"
+        );
+
+        $sheet->setCellValue(
+            "{$rightStart}{$row}",
+            'Diperiksa Oleh'
+        );
 
         $sheet->getStyle("A{$row}:N{$row}")
             ->getFont()
@@ -622,17 +730,22 @@ class LaporanPengendalianProdukDepanSheet implements
             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
             ->setVertical(Alignment::VERTICAL_CENTER);
 
-        $sheet->getStyle("{$leftStart}{$row}:{$leftEnd}{$row}")
+        $sheet->getStyle(
+            "{$leftStart}{$row}:{$leftEnd}{$row}"
+        )
             ->getBorders()
             ->getAllBorders()
             ->setBorderStyle(Border::BORDER_THIN);
 
-        $sheet->getStyle("{$rightStart}{$row}:{$rightEnd}{$row}")
+        $sheet->getStyle(
+            "{$rightStart}{$row}:{$rightEnd}{$row}"
+        )
             ->getBorders()
             ->getAllBorders()
             ->setBorderStyle(Border::BORDER_THIN);
 
         $sheet->getRowDimension($row)->setRowHeight(28);
+
         $row++;
 
         $endTtdRow = $row + 3;
@@ -665,13 +778,19 @@ class LaporanPengendalianProdukDepanSheet implements
 
         $row = $endTtdRow + 1;
 
-        $sheet->mergeCells("{$leftStart}{$row}:{$leftEnd}{$row}");
+        $sheet->mergeCells(
+            "{$leftStart}{$row}:{$leftEnd}{$row}"
+        );
+
         $sheet->setCellValue(
             "{$leftStart}{$row}",
             '(................................)'
         );
 
-        $sheet->mergeCells("{$rightStart}{$row}:{$rightEnd}{$row}");
+        $sheet->mergeCells(
+            "{$rightStart}{$row}:{$rightEnd}{$row}"
+        );
+
         $sheet->setCellValue(
             "{$rightStart}{$row}",
             '(................................)'
@@ -780,16 +899,19 @@ class LaporanPengendalianProdukDepanSheet implements
                 'Petugas',
                 'PIC Produksi'
             ],
-            'rows' => $this->productionBatch->suhuRuangs->map(fn ($item) => [
-                $this->number($item->suhu_ruang_meatprep),
-                $this->number($item->suhu_ruang_chillroom),
-                $this->time($item->waktu_mulai),
-                $this->time($item->waktu_selesai),
-                $this->number($item->downtime),
-                $item->keterangan ?? '-',
-                $item->petugas ?? '-',
-                $item->pic_produksi ?? '-',
-            ])->values()->all(),
+            'rows' => $this->productionBatch->suhuRuangs
+                ->map(fn ($item) => [
+                    $this->number($item->suhu_ruang_meatprep),
+                    $this->number($item->suhu_ruang_chillroom),
+                    $this->time($item->waktu_mulai),
+                    $this->time($item->waktu_selesai),
+                    $this->number($item->downtime),
+                    $item->keterangan ?? '-',
+                    $item->petugas ?? '-',
+                    $item->pic_produksi ?? '-',
+                ])
+                ->values()
+                ->all(),
         ];
     }
 
@@ -807,17 +929,20 @@ class LaporanPengendalianProdukDepanSheet implements
                 'Petugas',
                 'PIC Produksi'
             ],
-            'rows' => $this->productionBatch->bowlCutters->map(fn ($item) => [
-                $this->number($item->speed),
-                $this->number($item->suhu_emulasi),
-                $item->homeganisasi_orlap ?? '-',
-                $this->time($item->waktu_mulai),
-                $this->time($item->waktu_selesai),
-                $this->number($item->downtime),
-                $item->keterangan ?? '-',
-                $item->petugas ?? '-',
-                $item->pic_produksi ?? '-',
-            ])->values()->all(),
+            'rows' => $this->productionBatch->bowlCutters
+                ->map(fn ($item) => [
+                    $this->number($item->speed),
+                    $this->number($item->suhu_emulasi),
+                    $item->homeganisasi_orlap ?? '-',
+                    $this->time($item->waktu_mulai),
+                    $this->time($item->waktu_selesai),
+                    $this->number($item->downtime),
+                    $item->keterangan ?? '-',
+                    $item->petugas ?? '-',
+                    $item->pic_produksi ?? '-',
+                ])
+                ->values()
+                ->all(),
         ];
     }
 
@@ -834,16 +959,19 @@ class LaporanPengendalianProdukDepanSheet implements
                 'Petugas',
                 'PIC Produksi'
             ],
-            'rows' => $this->productionBatch->grinders->map(fn ($item) => [
-                $item->ukuran_saringan ?? '-',
-                $item->hasil ?? '-',
-                $this->time($item->waktu_mulai),
-                $this->time($item->waktu_selesai),
-                $this->number($item->downtime),
-                $item->keterangan ?? '-',
-                $item->petugas ?? '-',
-                $item->pic_produksi ?? '-',
-            ])->values()->all(),
+            'rows' => $this->productionBatch->grinders
+                ->map(fn ($item) => [
+                    $item->ukuran_saringan ?? '-',
+                    $item->hasil ?? '-',
+                    $this->time($item->waktu_mulai),
+                    $this->time($item->waktu_selesai),
+                    $this->number($item->downtime),
+                    $item->keterangan ?? '-',
+                    $item->petugas ?? '-',
+                    $item->pic_produksi ?? '-',
+                ])
+                ->values()
+                ->all(),
         ];
     }
 
@@ -866,22 +994,25 @@ class LaporanPengendalianProdukDepanSheet implements
                 'Petugas',
                 'PIC Produksi'
             ],
-            'rows' => $this->productionBatch->mixings->map(fn ($item) => [
-                $item->mixer_preparation ?? '-',
-                $this->number($item->suhu_air),
-                $this->number($item->lama_pengadukan),
-                $item->filter ?? '-',
-                $this->number($item->salinity),
-                $this->number($item->brix),
-                $item->mixer ?? '-',
-                $this->number($item->suhu_adonan),
-                $this->time($item->waktu_mulai),
-                $this->time($item->waktu_selesai),
-                $this->number($item->downtime),
-                $item->keterangan ?? '-',
-                $item->petugas ?? '-',
-                $item->pic_produksi ?? '-',
-            ])->values()->all(),
+            'rows' => $this->productionBatch->mixings
+                ->map(fn ($item) => [
+                    $item->mixer_preparation ?? '-',
+                    $this->number($item->suhu_air),
+                    $this->number($item->lama_pengadukan),
+                    $item->filter ?? '-',
+                    $this->number($item->salinity),
+                    $this->number($item->brix),
+                    $item->mixer ?? '-',
+                    $this->number($item->suhu_adonan),
+                    $this->time($item->waktu_mulai),
+                    $this->time($item->waktu_selesai),
+                    $this->number($item->downtime),
+                    $item->keterangan ?? '-',
+                    $item->petugas ?? '-',
+                    $item->pic_produksi ?? '-',
+                ])
+                ->values()
+                ->all(),
         ];
     }
 
@@ -898,16 +1029,19 @@ class LaporanPengendalianProdukDepanSheet implements
                 'Petugas',
                 'PIC Produksi'
             ],
-            'rows' => $this->productionBatch->preparasiFlas->map(fn ($item) => [
-                $item->homeganisasi_orlap ?? '-',
-                $this->number($item->suhu_fla_after_cooling_down),
-                $this->time($item->waktu_mulai),
-                $this->time($item->waktu_selesai),
-                $this->number($item->downtime),
-                $item->keterangan ?? '-',
-                $item->petugas ?? '-',
-                $item->pic_produksi ?? '-',
-            ])->values()->all(),
+            'rows' => $this->productionBatch->preparasiFlas
+                ->map(fn ($item) => [
+                    $item->homeganisasi_orlap ?? '-',
+                    $this->number($item->suhu_fla_after_cooling_down),
+                    $this->time($item->waktu_mulai),
+                    $this->time($item->waktu_selesai),
+                    $this->number($item->downtime),
+                    $item->keterangan ?? '-',
+                    $item->petugas ?? '-',
+                    $item->pic_produksi ?? '-',
+                ])
+                ->values()
+                ->all(),
         ];
     }
 
@@ -927,19 +1061,22 @@ class LaporanPengendalianProdukDepanSheet implements
                 'Petugas',
                 'PIC Produksi'
             ],
-            'rows' => $this->productionBatch->tumblers->map(fn ($item) => [
-                $item->tumbler ?? '-',
-                $this->number($item->drum_on),
-                $this->number($item->drum_off),
-                $this->number($item->vacuum_a),
-                $this->number($item->vacuum_b),
-                $this->time($item->waktu_mulai),
-                $this->time($item->waktu_selesai),
-                $this->number($item->downtime),
-                $item->keterangan ?? '-',
-                $item->petugas ?? '-',
-                $item->pic_produksi ?? '-',
-            ])->values()->all(),
+            'rows' => $this->productionBatch->tumblers
+                ->map(fn ($item) => [
+                    $item->tumbler ?? '-',
+                    $this->number($item->drum_on),
+                    $this->number($item->drum_off),
+                    $this->number($item->vacuum_a),
+                    $this->number($item->vacuum_b),
+                    $this->time($item->waktu_mulai),
+                    $this->time($item->waktu_selesai),
+                    $this->number($item->downtime),
+                    $item->keterangan ?? '-',
+                    $item->petugas ?? '-',
+                    $item->pic_produksi ?? '-',
+                ])
+                ->values()
+                ->all(),
         ];
     }
 
@@ -958,18 +1095,21 @@ class LaporanPengendalianProdukDepanSheet implements
                 'Petugas',
                 'PIC Produksi'
             ],
-            'rows' => $this->productionBatch->formings->map(fn ($item) => [
-                $item->alat ?? '-',
-                $this->number($item->suhu_adonan),
-                $this->number($item->pressure),
-                $this->number($item->speed),
-                $this->time($item->waktu_mulai),
-                $this->time($item->waktu_selesai),
-                $this->number($item->downtime),
-                $item->keterangan ?? '-',
-                $item->petugas ?? '-',
-                $item->pic_produksi ?? '-',
-            ])->values()->all(),
+            'rows' => $this->productionBatch->formings
+                ->map(fn ($item) => [
+                    $item->alat ?? '-',
+                    $this->number($item->suhu_adonan),
+                    $this->number($item->pressure),
+                    $this->number($item->speed),
+                    $this->time($item->waktu_mulai),
+                    $this->time($item->waktu_selesai),
+                    $this->number($item->downtime),
+                    $item->keterangan ?? '-',
+                    $item->petugas ?? '-',
+                    $item->pic_produksi ?? '-',
+                ])
+                ->values()
+                ->all(),
         ];
     }
 
@@ -988,18 +1128,21 @@ class LaporanPengendalianProdukDepanSheet implements
                 'Petugas',
                 'PIC Produksi'
             ],
-            'rows' => $this->productionBatch->batters->map(fn ($item) => [
-                $item->batter ?? '-',
-                $this->number($item->suhu_batter),
-                $this->number($item->viskositas),
-                $this->number($item->salinity),
-                $this->time($item->waktu_mulai),
-                $this->time($item->waktu_selesai),
-                $this->number($item->downtime),
-                $item->keterangan ?? '-',
-                $item->petugas ?? '-',
-                $item->pic_produksi ?? '-',
-            ])->values()->all(),
+            'rows' => $this->productionBatch->batters
+                ->map(fn ($item) => [
+                    $item->batter ?? '-',
+                    $this->number($item->suhu_batter),
+                    $this->number($item->viskositas),
+                    $this->number($item->salinity),
+                    $this->time($item->waktu_mulai),
+                    $this->time($item->waktu_selesai),
+                    $this->number($item->downtime),
+                    $item->keterangan ?? '-',
+                    $item->petugas ?? '-',
+                    $item->pic_produksi ?? '-',
+                ])
+                ->values()
+                ->all(),
         ];
     }
 
@@ -1016,16 +1159,19 @@ class LaporanPengendalianProdukDepanSheet implements
                 'Petugas',
                 'PIC Produksi'
             ],
-            'rows' => $this->productionBatch->predustBreaders->map(fn ($item) => [
-                $item->predust_breader ?? '-',
-                $this->number($item->superflex),
-                $this->time($item->waktu_mulai),
-                $this->time($item->waktu_selesai),
-                $this->number($item->downtime),
-                $item->keterangan ?? '-',
-                $item->petugas ?? '-',
-                $item->pic_produksi ?? '-',
-            ])->values()->all(),
+            'rows' => $this->productionBatch->predustBreaders
+                ->map(fn ($item) => [
+                    $item->predust_breader ?? '-',
+                    $this->number($item->superflex),
+                    $this->time($item->waktu_mulai),
+                    $this->time($item->waktu_selesai),
+                    $this->number($item->downtime),
+                    $item->keterangan ?? '-',
+                    $item->petugas ?? '-',
+                    $item->pic_produksi ?? '-',
+                ])
+                ->values()
+                ->all(),
         ];
     }
 
@@ -1048,22 +1194,25 @@ class LaporanPengendalianProdukDepanSheet implements
                 'Petugas',
                 'PIC Produksi'
             ],
-            'rows' => $this->productionBatch->fryers->map(fn ($item) => [
-                $item->fryer ?? '-',
-                $this->number($item->suhu_setting),
-                $this->number($item->suhu_aktual),
-                $this->number($item->suhu_pusat),
-                $this->number($item->suhu_minimum),
-                $item->organoleptik ?? '-',
-                $this->number($item->lama_pemasakan),
-                $this->number($item->tpm_minyak),
-                $this->time($item->waktu_mulai),
-                $this->time($item->waktu_selesai),
-                $this->number($item->downtime),
-                $item->keterangan ?? '-',
-                $item->petugas ?? '-',
-                $item->pic_produksi ?? '-',
-            ])->values()->all(),
+            'rows' => $this->productionBatch->fryers
+                ->map(fn ($item) => [
+                    $item->fryer ?? '-',
+                    $this->number($item->suhu_setting),
+                    $this->number($item->suhu_aktual),
+                    $this->number($item->suhu_pusat),
+                    $this->number($item->suhu_minimum),
+                    $item->organoleptik ?? '-',
+                    $this->number($item->lama_pemasakan),
+                    $this->number($item->tpm_minyak),
+                    $this->time($item->waktu_mulai),
+                    $this->time($item->waktu_selesai),
+                    $this->number($item->downtime),
+                    $item->keterangan ?? '-',
+                    $item->petugas ?? '-',
+                    $item->pic_produksi ?? '-',
+                ])
+                ->values()
+                ->all(),
         ];
     }
 
@@ -1086,40 +1235,25 @@ class LaporanPengendalianProdukDepanSheet implements
                 'Petugas',
                 'PIC Produksi'
             ],
-            'rows' => $this->productionBatch->hlts->map(fn ($item) => [
-                $this->number($item->suhu_awal_daging),
-                $this->number($item->suhu_infeed),
-                $this->number($item->suhu_outfeed),
-                $this->number($item->steam_valve),
-                $this->number($item->speed_ventilator),
-                $this->number($item->lama_pemasakan),
-                $this->number($item->suhu_pusat_ct),
-                $item->organoleptik ?? '-',
-                $this->time($item->waktu_mulai),
-                $this->time($item->waktu_selesai),
-                $this->number($item->downtime),
-                $item->keterangan ?? '-',
-                $item->petugas ?? '-',
-                $item->pic_produksi ?? '-',
-            ])->values()->all(),
-        ];
-    }
-
-    protected function metalDetectors(): array
-    {
-        return [
-            'columns' => [
-                'Batch Type',
-                'Metal Detector',
-                'Waktu Awal',
-                'Waktu Akhir'
-            ],
-            'rows' => $this->productionBatch->metalDetectors->map(fn ($item) => [
-                $item->batch_type ?? '-',
-                $item->metal_detector ?? '-',
-                $this->time($item->waktu_awal),
-                $this->time($item->waktu_akhir),
-            ])->values()->all(),
+            'rows' => $this->productionBatch->hlts
+                ->map(fn ($item) => [
+                    $this->number($item->suhu_awal_daging),
+                    $this->number($item->suhu_infeed),
+                    $this->number($item->suhu_outfeed),
+                    $this->number($item->steam_valve),
+                    $this->number($item->speed_ventilator),
+                    $this->number($item->lama_pemasakan),
+                    $this->number($item->suhu_pusat_ct),
+                    $item->organoleptik ?? '-',
+                    $this->time($item->waktu_mulai),
+                    $this->time($item->waktu_selesai),
+                    $this->number($item->downtime),
+                    $item->keterangan ?? '-',
+                    $item->petugas ?? '-',
+                    $item->pic_produksi ?? '-',
+                ])
+                ->values()
+                ->all(),
         ];
     }
 
