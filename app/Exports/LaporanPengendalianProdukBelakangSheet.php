@@ -1108,75 +1108,47 @@ class LaporanPengendalianProdukBelakangSheet implements
     protected function buildApproval(
         $sheet,
         int $row
-    ): void {
-        $hasKomposisi = $this->hasSticker('stiker_komposisi');
+        ): void {
         $hasCppb = $this->hasSticker('stiker_cppb_qi_bb');
         $hasBpom = $this->hasSticker('stiker_bpom');
-        $hasKodeCetak = $this->hasSticker('stiker_kode_cetak');
+        $hasKomposisi = $this->hasSticker('stiker_kode_cetak');
 
-        if ($hasKomposisi || $hasCppb || $hasBpom) {
+        if ($hasCppb || $hasBpom || $hasKomposisi) {
             $boxEnd = $row + 5;
 
-            if ($hasKomposisi || $hasCppb) {
-                $items = [];
+            $items = [];
 
-                if ($hasKomposisi) {
-                    $items[] = [
-                        'weight' => 3,
-                        'path' => $this->productionBatch->stiker_komposisi,
-                    ];
-                }
-
-                if ($hasCppb) {
-                    $items[] = [
-                        'weight' => 1,
-                        'path' => $this->productionBatch->stiker_cppb_qi_bb,
-                    ];
-                }
-
-                $this->buildStickerGroup(
-                    $sheet,
-                    $row,
-                    $boxEnd,
-                    'A',
-                    'F',
-                    $items
-                );
+            if ($hasCppb) {
+                $items[] = [
+                    'weight' => 1,
+                    'path' => $this->productionBatch->stiker_cppb_qi_bb,
+                ];
             }
 
             if ($hasBpom) {
-                $this->buildStickerGroup(
-                    $sheet,
-                    $row,
-                    $boxEnd,
-                    'I',
-                    'O',
-                    [[
-                        'weight' => 1,
-                        'path' => $this->productionBatch->stiker_bpom,
-                    ]]
-                );
+                $items[] = [
+                    'weight' => 1,
+                    'path' => $this->productionBatch->stiker_bpom,
+                ];
             }
 
-            $row = $boxEnd + 2;
-        }
-
-        if ($hasKodeCetak) {
-            $stripEnd = $row + 3;
+            if ($hasKomposisi) {
+                $items[] = [
+                    'weight' => 3,
+                    'path' => $this->productionBatch->stiker_kode_cetak,
+                ];
+            }
 
             $this->buildStickerGroup(
                 $sheet,
                 $row,
-                $stripEnd,
+                $boxEnd,
                 'A',
                 'O',
-                [[
-                    'weight' => 1,
-                    'path' => $this->productionBatch->stiker_kode_cetak,
-                ]]
+                $items
             );
 
-            $row = $stripEnd + 2;
+            $row = $boxEnd + 2;
         }
 
         $this->approvalBox(
@@ -1194,7 +1166,8 @@ class LaporanPengendalianProdukBelakangSheet implements
             'O',
             'Diperiksa Oleh'
         );
-    }
+
+        }
 
     protected function hasSticker(string $field): bool
     {

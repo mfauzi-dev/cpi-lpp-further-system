@@ -12,6 +12,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 class LaporanPengendalianProdukDepanSheet implements
     FromCollection,
@@ -130,6 +131,7 @@ class LaporanPengendalianProdukDepanSheet implements
                 $row = $this->buildKemasanRijekBlock($sheet, $row);
 
                 $this->buildApproval($sheet, $row);
+                $this->buildStikerKomposisi($sheet, $row + 6);
 
                 $sheet->setShowGridlines(false);
             },
@@ -1342,4 +1344,25 @@ class LaporanPengendalianProdukDepanSheet implements
 
         return substr((string) $value, 0, 5);
     }
+    protected function buildStikerKomposisi($sheet, int $row): void
+    {
+        $stiker = $this->productionBatch->stiker_komposisi ?? null;
+        $path = $stiker ? storage_path('app/public/' . $stiker) : null;
+
+        if (!$path || !file_exists($path)) {
+            return;
+        }
+
+        $drawing = new Drawing();
+        $drawing->setName('Stiker Komposisi');
+        $drawing->setDescription('Stiker Komposisi');
+        $drawing->setPath($path);
+        // Letakkan stiker di bawah judul tanda tangan, di tengah antara dua area approval.
+        $drawing->setCoordinates('G' . $row);
+        $drawing->setHeight(70);
+        $drawing->setOffsetX(8);
+        $drawing->setOffsetY(4);
+        $drawing->setWorksheet($sheet);
+    }
+
 }

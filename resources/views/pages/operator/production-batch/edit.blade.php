@@ -262,40 +262,42 @@
 
                 </div>
 
+
                 {{-- STIKER --}}
                 <div class="card mb-4">
-
                     <div class="card-header">
                         <h4>
                             <span class="step-badge">+</span>
                             Stiker yang Ditempel
                         </h4>
                     </div>
-
                     <div class="card-body">
-
-                        <p class="text-muted mb-3">
-                            Upload foto/scan stiker baru untuk mengganti yang lama. Centang "Hapus stiker ini" untuk melepas
-                            tanpa menggantinya.
+                        <p class="text-muted mb-4">
+                            Upload foto atau scan baru untuk mengganti stiker lama.
+                            Centang "Hapus stiker ini" jika ingin menghapus stiker tanpa menggantinya.
+                            Perhatikan posisi lembar depan dan lembar belakang.
                         </p>
 
-                        <div class="row">
-
-                            <div class="col-md-3 col-6 mb-3">
-
-                                <div class="form-group">
-
+                        {{-- STIKER LEMBAR DEPAN --}}
+                        <div class="card border mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-file-alt mr-2"></i>
+                                    Lembar Depan
+                                    <span class="badge badge-primary ml-2">1 Stiker</span>
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group mb-0">
                                     <label class="filter-label">
                                         Label Komposisi
                                     </label>
 
                                     @if ($productionBatch->stiker_komposisi)
-                                        <div class="mb-2">
-
+                                        <div class="mb-3">
                                             <img src="{{ asset('storage/' . $productionBatch->stiker_komposisi) }}"
-                                                alt="Stiker Komposisi" class="d-block mb-2"
-                                                style="max-width:100%; max-height:80px;">
-
+                                                alt="Stiker Label Komposisi - Lembar Depan" class="d-block mb-2"
+                                                style="max-width: 100%; max-height: 120px; object-fit: contain;">
                                             <div class="custom-control custom-checkbox">
                                                 <input type="checkbox" class="custom-control-input"
                                                     id="hapus_stiker_komposisi" name="hapus_stiker_komposisi"
@@ -304,146 +306,136 @@
                                                     Hapus stiker ini
                                                 </label>
                                             </div>
-
                                         </div>
                                     @endif
 
                                     <input type="file" name="stiker_komposisi" accept="image/*"
                                         class="form-control @error('stiker_komposisi') is-invalid @enderror">
-
                                     @error('stiker_komposisi')
                                         <div class="invalid-feedback">
                                             {{ $message }}
                                         </div>
                                     @enderror
-
+                                    <small class="form-text text-muted">
+                                        Upload Label Komposisi untuk lembar depan.
+                                    </small>
                                 </div>
-
                             </div>
-
-                            <div class="col-md-3 col-6 mb-3">
-
-                                <div class="form-group">
-
-                                    <label class="filter-label">
-                                        CPPB / QI / BB
-                                    </label>
-
-                                    @if ($productionBatch->stiker_cppb_qi_bb)
-                                        <div class="mb-2">
-
-                                            <img src="{{ asset('storage/' . $productionBatch->stiker_cppb_qi_bb) }}"
-                                                alt="Stiker CPPB / QI / BB" class="d-block mb-2"
-                                                style="max-width:100%; max-height:80px;">
-
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input"
-                                                    id="hapus_stiker_cppb_qi_bb" name="hapus_stiker_cppb_qi_bb"
-                                                    value="1">
-                                                <label class="custom-control-label" for="hapus_stiker_cppb_qi_bb">
-                                                    Hapus stiker ini
-                                                </label>
-                                            </div>
-
-                                        </div>
-                                    @endif
-
-                                    <input type="file" name="stiker_cppb_qi_bb" accept="image/*"
-                                        class="form-control @error('stiker_cppb_qi_bb') is-invalid @enderror">
-
-                                    @error('stiker_cppb_qi_bb')
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-
-                                </div>
-
-                            </div>
-
-                            <div class="col-md-3 col-6 mb-3">
-
-                                <div class="form-group">
-
-                                    <label class="filter-label">
-                                        BPOM RI MD
-                                    </label>
-
-                                    @if ($productionBatch->stiker_bpom)
-                                        <div class="mb-2">
-
-                                            <img src="{{ asset('storage/' . $productionBatch->stiker_bpom) }}"
-                                                alt="Stiker BPOM RI MD" class="d-block mb-2"
-                                                style="max-width:100%; max-height:80px;">
-
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input"
-                                                    id="hapus_stiker_bpom" name="hapus_stiker_bpom" value="1">
-                                                <label class="custom-control-label" for="hapus_stiker_bpom">
-                                                    Hapus stiker ini
-                                                </label>
-                                            </div>
-
-                                        </div>
-                                    @endif
-
-                                    <input type="file" name="stiker_bpom" accept="image/*"
-                                        class="form-control @error('stiker_bpom') is-invalid @enderror">
-
-                                    @error('stiker_bpom')
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-
-                                </div>
-
-                            </div>
-
-                            <div class="col-md-3 col-6 mb-3">
-
-                                <div class="form-group">
-
-                                    <label class="filter-label">
-                                        Kode Cetak
-                                    </label>
-
-                                    @if ($productionBatch->stiker_kode_cetak)
-                                        <div class="mb-2">
-
-                                            <img src="{{ asset('storage/' . $productionBatch->stiker_kode_cetak) }}"
-                                                alt="Stiker Kode Cetak" class="d-block mb-2"
-                                                style="max-width:100%; max-height:80px;">
-
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input"
-                                                    id="hapus_stiker_kode_cetak" name="hapus_stiker_kode_cetak"
-                                                    value="1">
-                                                <label class="custom-control-label" for="hapus_stiker_kode_cetak">
-                                                    Hapus stiker ini
-                                                </label>
-                                            </div>
-
-                                        </div>
-                                    @endif
-
-                                    <input type="file" name="stiker_kode_cetak" accept="image/*"
-                                        class="form-control @error('stiker_kode_cetak') is-invalid @enderror">
-
-                                    @error('stiker_kode_cetak')
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-
-                                </div>
-
-                            </div>
-
                         </div>
 
-                    </div>
+                        {{-- STIKER LEMBAR BELAKANG --}}
+                        <div class="card border mb-0">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-file-alt mr-2"></i>
+                                    Lembar Belakang
+                                    <span class="badge badge-secondary ml-2">3 Stiker</span>
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    {{-- CPPB / QI / BB --}}
+                                    <div class="col-md-4 col-12 mb-3">
+                                        <div class="form-group mb-0">
+                                            <label class="filter-label">
+                                                CPPB / QI / BB
+                                            </label>
 
+                                            @if ($productionBatch->stiker_cppb_qi_bb)
+                                                <div class="mb-3">
+                                                    <img src="{{ asset('storage/' . $productionBatch->stiker_cppb_qi_bb) }}"
+                                                        alt="Stiker CPPB / QI / BB - Lembar Belakang" class="d-block mb-2"
+                                                        style="max-width: 100%; max-height: 120px; object-fit: contain;">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input"
+                                                            id="hapus_stiker_cppb_qi_bb" name="hapus_stiker_cppb_qi_bb"
+                                                            value="1">
+                                                        <label class="custom-control-label" for="hapus_stiker_cppb_qi_bb">
+                                                            Hapus stiker ini
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            <input type="file" name="stiker_cppb_qi_bb" accept="image/*"
+                                                class="form-control @error('stiker_cppb_qi_bb') is-invalid @enderror">
+                                            @error('stiker_cppb_qi_bb')
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    {{-- BPOM RI MD --}}
+                                    <div class="col-md-4 col-12 mb-3">
+                                        <div class="form-group mb-0">
+                                            <label class="filter-label">
+                                                BPOM RI MD
+                                            </label>
+
+                                            @if ($productionBatch->stiker_bpom)
+                                                <div class="mb-3">
+                                                    <img src="{{ asset('storage/' . $productionBatch->stiker_bpom) }}"
+                                                        alt="Stiker BPOM RI MD - Lembar Belakang" class="d-block mb-2"
+                                                        style="max-width: 100%; max-height: 120px; object-fit: contain;">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input"
+                                                            id="hapus_stiker_bpom" name="hapus_stiker_bpom"
+                                                            value="1">
+                                                        <label class="custom-control-label" for="hapus_stiker_bpom">
+                                                            Hapus stiker ini
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            <input type="file" name="stiker_bpom" accept="image/*"
+                                                class="form-control @error('stiker_bpom') is-invalid @enderror">
+                                            @error('stiker_bpom')
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    {{-- Kode Cetak --}}
+                                    <div class="col-md-4 col-12 mb-0">
+                                        <div class="form-group mb-0">
+                                            <label class="filter-label">
+                                                Kode Cetak
+                                            </label>
+
+                                            @if ($productionBatch->stiker_kode_cetak)
+                                                <div class="mb-3">
+                                                    <img src="{{ asset('storage/' . $productionBatch->stiker_kode_cetak) }}"
+                                                        alt="Stiker Kode Cetak - Lembar Belakang" class="d-block mb-2"
+                                                        style="max-width: 100%; max-height: 120px; object-fit: contain;">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input"
+                                                            id="hapus_stiker_kode_cetak" name="hapus_stiker_kode_cetak"
+                                                            value="1">
+                                                        <label class="custom-control-label" for="hapus_stiker_kode_cetak">
+                                                            Hapus stiker ini
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            <input type="file" name="stiker_kode_cetak" accept="image/*"
+                                                class="form-control @error('stiker_kode_cetak') is-invalid @enderror">
+                                            @error('stiker_kode_cetak')
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {{-- STEP 2 --}}
