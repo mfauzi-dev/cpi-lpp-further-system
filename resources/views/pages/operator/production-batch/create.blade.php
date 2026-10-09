@@ -60,7 +60,8 @@
                 </div>
             @endif
 
-            <form action="{{ route('operator.production-batch.store') }}" method="POST" id="form-production-batch">
+            <form action="{{ route('operator.production-batch.store') }}" method="POST" id="form-production-batch"
+                enctype="multipart/form-data">
 
                 @csrf
 
@@ -250,6 +251,114 @@
 
                             <div class="text-muted mt-1">
                                 Masukkan No Batch sesuai dengan nomor batch produksi yang digunakan.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {{-- STIKER --}}
+                <div class="card mb-4">
+
+                    <div class="card-header">
+                        <h4>
+                            <span class="step-badge">+</span>
+                            Stiker yang Ditempel
+                        </h4>
+                    </div>
+
+                    <div class="card-body">
+
+                        <p class="text-muted mb-3">
+                            Upload foto/scan stiker jika ada. Semua boleh dikosongkan.
+                        </p>
+
+                        <div class="row">
+
+                            <div class="col-md-3 col-6 mb-3">
+
+                                <div class="form-group">
+
+                                    <label class="filter-label">
+                                        Label Komposisi
+                                    </label>
+
+                                    <input type="file" name="stiker_komposisi" accept="image/*"
+                                        class="form-control @error('stiker_komposisi') is-invalid @enderror">
+
+                                    @error('stiker_komposisi')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-3 col-6 mb-3">
+
+                                <div class="form-group">
+
+                                    <label class="filter-label">
+                                        CPPB / QI / BB
+                                    </label>
+
+                                    <input type="file" name="stiker_cppb_qi_bb" accept="image/*"
+                                        class="form-control @error('stiker_cppb_qi_bb') is-invalid @enderror">
+
+                                    @error('stiker_cppb_qi_bb')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-3 col-6 mb-3">
+
+                                <div class="form-group">
+
+                                    <label class="filter-label">
+                                        BPOM RI MD
+                                    </label>
+
+                                    <input type="file" name="stiker_bpom" accept="image/*"
+                                        class="form-control @error('stiker_bpom') is-invalid @enderror">
+
+                                    @error('stiker_bpom')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-3 col-6 mb-3">
+
+                                <div class="form-group">
+
+                                    <label class="filter-label">
+                                        Kode Cetak
+                                    </label>
+
+                                    <input type="file" name="stiker_kode_cetak" accept="image/*"
+                                        class="form-control @error('stiker_kode_cetak') is-invalid @enderror">
+
+                                    @error('stiker_kode_cetak')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+
+                                </div>
+
                             </div>
 
                         </div>

@@ -8,6 +8,7 @@ use App\Models\ProductionBatch;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ProductionBatchController extends Controller
@@ -241,33 +242,40 @@ class ProductionBatchController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'product_id' => [
-                'required',
-                'exists:products,id',
-            ],
-            'no_batch' => [
-                'required',
-                'string',
-                'max:100',
-            ],
-            'tanggal_produksi' => [
-                'required',
-                'date',
-            ],
-            'line' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-            'tipe_proses' => [
-                'nullable',
-                'in:forming,non_forming,non_forming_roasted',
-            ],
+            'product_id' => ['required', 'exists:products,id'],
+            'no_batch' => ['required', 'string', 'max:100'],
+            'tanggal_produksi' => ['required', 'date'],
+            'line' => ['nullable', 'string', 'max:100'],
+            'tipe_proses' => ['nullable', 'in:forming,non_forming,non_forming_roasted'],
+            'stiker_komposisi' => ['nullable', 'image', 'max:2048'],
+            'stiker_cppb_qi_bb' => ['nullable', 'image', 'max:2048'],
+            'stiker_bpom' => ['nullable', 'image', 'max:2048'],
+            'stiker_kode_cetak' => ['nullable', 'image', 'max:2048'],
         ]);
 
         DB::beginTransaction();
 
         try {
+            $stikerKomposisiPath = null;
+            if ($request->hasFile('stiker_komposisi')) {
+                $stikerKomposisiPath = $request->file('stiker_komposisi')->store('stiker', 'public');
+            }
+
+            $stikerCppbQiBbPath = null;
+            if ($request->hasFile('stiker_cppb_qi_bb')) {
+                $stikerCppbQiBbPath = $request->file('stiker_cppb_qi_bb')->store('stiker', 'public');
+            }
+
+            $stikerBpomPath = null;
+            if ($request->hasFile('stiker_bpom')) {
+                $stikerBpomPath = $request->file('stiker_bpom')->store('stiker', 'public');
+            }
+
+            $stikerKodeCetakPath = null;
+            if ($request->hasFile('stiker_kode_cetak')) {
+                $stikerKodeCetakPath = $request->file('stiker_kode_cetak')->store('stiker', 'public');
+            }
+
             ProductionBatch::create([
                 'product_id' => $request->product_id,
                 'no_batch' => $request->no_batch,
@@ -278,26 +286,24 @@ class ProductionBatchController extends Controller
                 'yield' => null,
                 'persen_rijek' => null,
                 'produktifitas' => null,
+                'stiker_komposisi' => $stikerKomposisiPath,
+                'stiker_cppb_qi_bb' => $stikerCppbQiBbPath,
+                'stiker_bpom' => $stikerBpomPath,
+                'stiker_kode_cetak' => $stikerKodeCetakPath,
             ]);
 
             DB::commit();
 
             return redirect()
                 ->route('operator.production-batch.index')
-                ->with(
-                    'success',
-                    'Data production batch berhasil disimpan.'
-                );
+                ->with('success', 'Data production batch berhasil disimpan.');
         } catch (\Throwable $e) {
             DB::rollBack();
 
             return redirect()
                 ->back()
                 ->withInput()
-                ->with(
-                    'error',
-                    'Gagal menyimpan data: ' . $e->getMessage()
-                );
+                ->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
         }
     }
 
@@ -323,28 +329,15 @@ class ProductionBatchController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'product_id' => [
-                'required',
-                'exists:products,id',
-            ],
-            'no_batch' => [
-                'required',
-                'string',
-                'max:100',
-            ],
-            'tanggal_produksi' => [
-                'required',
-                'date',
-            ],
-            'line' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-            'tipe_proses' => [
-                'required',
-                'in:forming,non_forming,non_forming_roasted',
-            ],
+            'product_id' => ['required', 'exists:products,id'],
+            'no_batch' => ['required', 'string', 'max:100'],
+            'tanggal_produksi' => ['required', 'date'],
+            'line' => ['nullable', 'string', 'max:100'],
+            'tipe_proses' => ['required', 'in:forming,non_forming,non_forming_roasted'],
+            'stiker_komposisi' => ['nullable', 'image', 'max:2048'],
+            'stiker_cppb_qi_bb' => ['nullable', 'image', 'max:2048'],
+            'stiker_bpom' => ['nullable', 'image', 'max:2048'],
+            'stiker_kode_cetak' => ['nullable', 'image', 'max:2048'],
         ]);
 
         DB::beginTransaction();
@@ -352,35 +345,82 @@ class ProductionBatchController extends Controller
         try {
             $productionBatch = ProductionBatch::findOrFail($id);
 
+            $stikerKomposisiPath = $productionBatch->stiker_komposisi;
+            if ($request->hasFile('stiker_komposisi')) {
+                if ($stikerKomposisiPath) {
+                    Storage::disk('public')->delete($stikerKomposisiPath);
+                }
+                $stikerKomposisiPath = $request->file('stiker_komposisi')->store('stiker', 'public');
+            } elseif ($request->boolean('hapus_stiker_komposisi')) {
+                if ($stikerKomposisiPath) {
+                    Storage::disk('public')->delete($stikerKomposisiPath);
+                }
+                $stikerKomposisiPath = null;
+            }
+
+            $stikerCppbQiBbPath = $productionBatch->stiker_cppb_qi_bb;
+            if ($request->hasFile('stiker_cppb_qi_bb')) {
+                if ($stikerCppbQiBbPath) {
+                    Storage::disk('public')->delete($stikerCppbQiBbPath);
+                }
+                $stikerCppbQiBbPath = $request->file('stiker_cppb_qi_bb')->store('stiker', 'public');
+            } elseif ($request->boolean('hapus_stiker_cppb_qi_bb')) {
+                if ($stikerCppbQiBbPath) {
+                    Storage::disk('public')->delete($stikerCppbQiBbPath);
+                }
+                $stikerCppbQiBbPath = null;
+            }
+
+            $stikerBpomPath = $productionBatch->stiker_bpom;
+            if ($request->hasFile('stiker_bpom')) {
+                if ($stikerBpomPath) {
+                    Storage::disk('public')->delete($stikerBpomPath);
+                }
+                $stikerBpomPath = $request->file('stiker_bpom')->store('stiker', 'public');
+            } elseif ($request->boolean('hapus_stiker_bpom')) {
+                if ($stikerBpomPath) {
+                    Storage::disk('public')->delete($stikerBpomPath);
+                }
+                $stikerBpomPath = null;
+            }
+
+            $stikerKodeCetakPath = $productionBatch->stiker_kode_cetak;
+            if ($request->hasFile('stiker_kode_cetak')) {
+                if ($stikerKodeCetakPath) {
+                    Storage::disk('public')->delete($stikerKodeCetakPath);
+                }
+                $stikerKodeCetakPath = $request->file('stiker_kode_cetak')->store('stiker', 'public');
+            } elseif ($request->boolean('hapus_stiker_kode_cetak')) {
+                if ($stikerKodeCetakPath) {
+                    Storage::disk('public')->delete($stikerKodeCetakPath);
+                }
+                $stikerKodeCetakPath = null;
+            }
+
             $productionBatch->update([
                 'product_id' => $request->product_id,
                 'no_batch' => $request->no_batch,
                 'tanggal_produksi' => $request->tanggal_produksi,
                 'line' => $request->line,
                 'tipe_proses' => $request->tipe_proses,
+                'stiker_komposisi' => $stikerKomposisiPath,
+                'stiker_cppb_qi_bb' => $stikerCppbQiBbPath,
+                'stiker_bpom' => $stikerBpomPath,
+                'stiker_kode_cetak' => $stikerKodeCetakPath,
             ]);
 
             DB::commit();
 
             return redirect()
-                ->route(
-                    'operator.production-batch.detail',
-                    $productionBatch->id
-                )
-                ->with(
-                    'success',
-                    'Data production batch berhasil diperbarui.'
-                );
+                ->route('operator.production-batch.detail', $productionBatch->id)
+                ->with('success', 'Data production batch berhasil diperbarui.');
         } catch (\Throwable $e) {
             DB::rollBack();
 
             return redirect()
                 ->back()
                 ->withInput()
-                ->with(
-                    'error',
-                    'Gagal memperbarui data: ' . $e->getMessage()
-                );
+                ->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
         }
     }
 

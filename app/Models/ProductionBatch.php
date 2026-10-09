@@ -19,6 +19,10 @@ class ProductionBatch extends Model
         'yield',
         'persen_rijek',
         'produktifitas',
+        'stiker_komposisi',
+        'stiker_cppb_qi_bb',
+        'stiker_bpom',
+        'stiker_kode_cetak',
     ];
 
     protected $casts = [

@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\ProductionBatch;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -11,6 +12,7 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 
 class LaporanPengendalianProdukBelakangSheet implements
@@ -1107,6 +1109,76 @@ class LaporanPengendalianProdukBelakangSheet implements
         $sheet,
         int $row
     ): void {
+        $hasKomposisi = $this->hasSticker('stiker_komposisi');
+        $hasCppb = $this->hasSticker('stiker_cppb_qi_bb');
+        $hasBpom = $this->hasSticker('stiker_bpom');
+        $hasKodeCetak = $this->hasSticker('stiker_kode_cetak');
+
+        if ($hasKomposisi || $hasCppb || $hasBpom) {
+            $boxEnd = $row + 5;
+
+            if ($hasKomposisi || $hasCppb) {
+                $items = [];
+
+                if ($hasKomposisi) {
+                    $items[] = [
+                        'weight' => 3,
+                        'path' => $this->productionBatch->stiker_komposisi,
+                    ];
+                }
+
+                if ($hasCppb) {
+                    $items[] = [
+                        'weight' => 1,
+                        'path' => $this->productionBatch->stiker_cppb_qi_bb,
+                    ];
+                }
+
+                $this->buildStickerGroup(
+                    $sheet,
+                    $row,
+                    $boxEnd,
+                    'A',
+                    'F',
+                    $items
+                );
+            }
+
+            if ($hasBpom) {
+                $this->buildStickerGroup(
+                    $sheet,
+                    $row,
+                    $boxEnd,
+                    'I',
+                    'O',
+                    [[
+                        'weight' => 1,
+                        'path' => $this->productionBatch->stiker_bpom,
+                    ]]
+                );
+            }
+
+            $row = $boxEnd + 2;
+        }
+
+        if ($hasKodeCetak) {
+            $stripEnd = $row + 3;
+
+            $this->buildStickerGroup(
+                $sheet,
+                $row,
+                $stripEnd,
+                'A',
+                'O',
+                [[
+                    'weight' => 1,
+                    'path' => $this->productionBatch->stiker_kode_cetak,
+                ]]
+            );
+
+            $row = $stripEnd + 2;
+        }
+
         $this->approvalBox(
             $sheet,
             $row,
@@ -1122,57 +1194,137 @@ class LaporanPengendalianProdukBelakangSheet implements
             'O',
             'Diperiksa Oleh'
         );
+    }
 
-        $row += 7;
+    protected function hasSticker(string $field): bool
+    {
+        $path = $this->productionBatch->{$field};
 
-        $this->approvalBox(
-            $sheet,
-            $row,
-            'A',
-            'F',
-            'STEMPEL BOX'
-        );
+        return $path && Storage::disk('public')->exists($path);
+    }
+
+    protected function buildStickerGroup(
+        $sheet,
+        int $rowStart,
+        int $rowEnd,
+        string $colStart,
+        string $colEnd,
+        array $items
+    ): void {
+        if (empty($items)) {
+            return;
+        }
+
+        $totalWeight = array_sum(array_column($items, 'weight'));
+        $totalColumns = ord($colEnd) - ord($colStart) + 1;
+        $allocated = 0;
+        $colIndex = 0;
+
+        foreach ($items as $i => $item) {
+            $isLast = $i === count($items) - 1;
+
+            $width = $isLast
+                ? $totalColumns - $allocated
+                : (int) round(
+                    ($item['weight'] / $totalWeight) * $totalColumns
+                );
+
+            $width = max($width, 1);
+
+            $start = chr(ord($colStart) + $colIndex);
+            $end = chr(ord($colStart) + $colIndex + $width - 1);
+
+            $this->placeStickerImage(
+                $sheet,
+                $rowStart,
+                $rowEnd,
+                $start,
+                $end,
+                $item['path']
+            );
+
+            $colIndex += $width;
+            $allocated += $width;
+        }
+    }
+
+    protected function placeStickerImage(
+        $sheet,
+        int $rowStart,
+        int $rowEnd,
+        string $start,
+        string $end,
+        string $imagePath
+    ): void {
+        $rowHeightPx = 26;
 
         $sheet->mergeCells(
-            "A" . ($row + 1) . ":F" . ($row + 6)
+            "{$start}{$rowStart}:{$end}{$rowEnd}"
         );
 
-        $sheet->setCellValue(
-            "A" . ($row + 1),
-            'TEMPAT STEMPEL BOX'
-        );
-
-        $sheet->getStyle(
-            "A" . ($row + 1) . ":F" . ($row + 6)
-        )
-            ->getBorders()
-            ->getAllBorders()
-            ->setBorderStyle(
-                Border::BORDER_THIN
-            );
-
-        $sheet->getStyle(
-            "A" . ($row + 1) . ":F" . ($row + 6)
-        )
-            ->getFont()
-            ->setBold(true)
-            ->setSize(13);
-
-        $sheet->getStyle(
-            "A" . ($row + 1) . ":F" . ($row + 6)
-        )
-            ->getAlignment()
-            ->setHorizontal(
-                Alignment::HORIZONTAL_CENTER
-            )
-            ->setVertical(
-                Alignment::VERTICAL_CENTER
-            );
-
-        for ($i = $row + 1; $i <= $row + 6; $i++) {
+        for ($i = $rowStart; $i <= $rowEnd; $i++) {
             $sheet->getRowDimension($i)
-                ->setRowHeight(24);
+                ->setRowHeight($rowHeightPx);
         }
+
+        $fullPath = Storage::disk('public')->path($imagePath);
+        $imageInfo = @getimagesize($fullPath);
+
+        if ($imageInfo === false) {
+            return;
+        }
+
+        [$origWidth, $origHeight] = $imageInfo;
+
+        $padding = 8;
+
+        $availableWidth = $this->columnRangeWidthPx($start, $end) - $padding;
+        $availableHeight = (
+            (($rowEnd - $rowStart + 1) * $rowHeightPx) - $padding
+        );
+
+        $scale = min(
+            $availableWidth / $origWidth,
+            $availableHeight / $origHeight
+        );
+
+        $drawWidth = (int) round($origWidth * $scale);
+        $drawHeight = (int) round($origHeight * $scale);
+
+        $offsetX = (int) max(
+            4,
+            ($availableWidth - $drawWidth) / 2
+        );
+
+        $offsetY = (int) max(
+            4,
+            ($availableHeight - $drawHeight) / 2
+        );
+
+        $drawing = new Drawing();
+        $drawing->setName('Sticker');
+        $drawing->setPath($fullPath);
+        $drawing->setResizeProportional(false);
+        $drawing->setCoordinates("{$start}{$rowStart}");
+        $drawing->setOffsetX($offsetX);
+        $drawing->setOffsetY($offsetY);
+        $drawing->setWidth($drawWidth);
+        $drawing->setHeight($drawHeight);
+        $drawing->setWorksheet($sheet);
+    }
+
+    protected function columnRangeWidthPx(string $start, string $end): int
+    {
+        $widths = $this->columnWidths();
+        $total = 0;
+
+        for ($col = ord($start); $col <= ord($end); $col++) {
+            $letter = chr($col);
+            $width = $widths[$letter] ?? 10;
+            $total += (int) round($width * 7);
+        }
+
+        return $total;
     }
 
     protected function approvalBox(
