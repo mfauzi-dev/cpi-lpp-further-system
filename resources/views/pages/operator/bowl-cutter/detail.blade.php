@@ -249,7 +249,7 @@
                                     </div>
 
                                     <div class="stat-value">
-                                        {{ $bowlCutter->speed !== null ? rtrim(rtrim(number_format($bowlCutter->speed, 2, ',', '.'), '0'), ',') : '-' }}
+                                        {{ $bowlCutter->speed }}
                                     </div>
                                 </div>
 
