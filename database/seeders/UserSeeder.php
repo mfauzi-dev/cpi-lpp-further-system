@@ -57,7 +57,7 @@ class UserSeeder extends Seeder
                 'updated_at' => now(),
             ],
              [
-                'name' => 'Mohammad Fauzi',
+                'name' => 'Manager Further',
                 'email' => 'managerfurther@mail.com',
                 'password' => Hash::make('password'),
                 'role_id' => $managerRole->id,
