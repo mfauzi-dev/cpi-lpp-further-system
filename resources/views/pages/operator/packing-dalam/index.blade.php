@@ -4,29 +4,20 @@
 
 @section('content')
     <div class="page-section">
-
         <div class="section-header">
             <h1>Packing Dalam</h1>
-
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item">
-                    <a href="{{ route('operator.packing-dalam.index') }}">
-                        Packing Dalam
-                    </a>
+                    <a href="{{ route('operator.packing-dalam.index') }}">Packing Dalam</a>
                 </div>
-
-                <div class="breadcrumb-item active">
-                    Table
-                </div>
+                <div class="breadcrumb-item active">Table</div>
             </div>
         </div>
 
         <div class="section-body">
-
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     {{ session('success') }}
-
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -36,7 +27,6 @@
             @if (session('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     {{ session('error') }}
-
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -57,38 +47,28 @@
                         Filter Data
                     </h4>
                 </div>
-
                 <div class="card-body">
                     <form method="GET" action="{{ route('operator.packing-dalam.index') }}">
                         <div class="row">
-
                             <div class="col-md-4 mb-3">
-                                <label>Kode Product</label>
-
-                                <input type="text" name="kode_product" class="form-control" placeholder="Cth: PRD001"
-                                    value="{{ request('kode_product') }}">
+                                <label>Production Batch</label>
+                                <input type="text" name="no_batch" class="form-control" placeholder="Cth: BATCH001"
+                                    value="{{ request('no_batch') }}">
                             </div>
-
                             <div class="col-md-4 mb-3">
                                 <label>Line</label>
-
                                 <input type="text" name="line" class="form-control" placeholder="Cth: Line 1"
                                     value="{{ request('line') }}">
                             </div>
-
                             <div class="col-md-4 mb-3">
                                 <label>Tanggal Dari</label>
-
                                 <input type="date" name="date_from" class="form-control"
                                     value="{{ request('date_from') }}">
                             </div>
-
                             <div class="col-md-4 mb-3">
                                 <label>Tanggal Sampai</label>
-
                                 <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
                             </div>
-
                         </div>
 
                         <div class="d-flex flex-wrap">
@@ -96,7 +76,6 @@
                                 <i class="fas fa-search mr-1"></i>
                                 Filter
                             </button>
-
                             <a href="{{ route('operator.packing-dalam.index') }}" class="btn btn-secondary mb-2">
                                 <i class="fas fa-sync-alt mr-1"></i>
                                 Reset
@@ -113,7 +92,6 @@
                         Daftar Packing Dalam
                     </h4>
                 </div>
-
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-bordered table-wide">
@@ -127,16 +105,12 @@
                                     <th>Waktu</th>
                                     <th>Line</th>
                                     <th>PIC Produksi</th>
-                                    <th width="150" class="text-center">
-                                        Aksi
-                                    </th>
+                                    <th width="150" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
-
                             <tbody>
                                 @forelse ($packingDalams as $packingDalam)
                                     <tr>
-
                                         <td>
                                             @if ($packingDalam->productionBatch?->tanggal_produksi)
                                                 {{ $packingDalam->productionBatch->tanggal_produksi->format('d-m-Y') }}
@@ -144,93 +118,72 @@
                                                 -
                                             @endif
                                         </td>
-
                                         <td>
                                             <span class="badge-soft">
                                                 {{ $packingDalam->productionBatch->no_batch ?? '-' }}
                                             </span>
                                         </td>
-
                                         <td>
                                             <span class="badge-value">
-                                                {{ $packingDalam->productionBatch->product->kode_product ?? '-' }}
+                                                {{ $packingDalam->productionBatch->product->kode ?? '-' }}
                                             </span>
                                         </td>
-
                                         <td>
                                             {{ $packingDalam->productionBatch->product->nama ?? '-' }}
                                         </td>
-
                                         <td>
-                                            @if ($packingDalam->productionBatch->waktu_kerja !== null)
+                                            @if ($packingDalam->productionBatch?->waktu_kerja !== null)
                                                 {{ $packingDalam->productionBatch->waktu_kerja }} Jam
                                             @else
                                                 -
                                             @endif
                                         </td>
-
                                         <td>
                                             @if ($packingDalam->waktu_awal || $packingDalam->waktu_akhir)
                                                 <span class="badge-value">
                                                     {{ $packingDalam->waktu_awal ? \Carbon\Carbon::parse($packingDalam->waktu_awal)->format('H:i') : '-' }}
-
                                                     &ndash;
-
                                                     {{ $packingDalam->waktu_akhir ? \Carbon\Carbon::parse($packingDalam->waktu_akhir)->format('H:i') : '-' }}
                                                 </span>
                                             @else
-                                                <span class="value-empty">
-                                                    -
-                                                </span>
+                                                <span class="value-empty">-</span>
                                             @endif
                                         </td>
-
                                         <td>
                                             {{ $packingDalam->productionBatch->line ?? '-' }}
                                         </td>
-
                                         <td>
                                             {{ $packingDalam->pic_produksi ?? '-' }}
                                         </td>
-
                                         <td class="text-center">
                                             <div class="action-buttons justify-content-center">
-
                                                 <a href="{{ route('operator.packing-dalam.detail', $packingDalam->id) }}"
                                                     class="btn btn-outline-info" title="Lihat Detail">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-
                                                 <a href="{{ route('operator.packing-dalam.edit', $packingDalam->id) }}"
                                                     class="btn btn-outline-warning" title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-
                                                 <form
                                                     action="{{ route('operator.packing-dalam.destroy', $packingDalam->id) }}"
                                                     method="POST"
                                                     onsubmit="return confirm('Yakin ingin menghapus data Packing Dalam ini?');">
                                                     @csrf
                                                     @method('DELETE')
-
                                                     <button type="submit" class="btn btn-outline-danger" title="Hapus">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
-
                                             </div>
                                         </td>
-
                                     </tr>
                                 @empty
                                     <tr>
                                         <td colspan="9">
                                             <div class="empty-state">
                                                 <i class="fas fa-box"></i>
-
-                                                <div>
-                                                    Belum ada data Packing Dalam.
-                                                </div>
+                                                <div>Belum ada data Packing Dalam.</div>
                                             </div>
                                         </td>
                                     </tr>
@@ -239,12 +192,10 @@
                         </table>
                     </div>
                 </div>
-
                 <div class="card-footer">
                     {{ $packingDalams->withQueryString()->links() }}
                 </div>
             </div>
-
         </div>
     </div>
 @endsection

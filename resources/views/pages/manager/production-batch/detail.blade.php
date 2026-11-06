@@ -557,7 +557,7 @@
                 </div>
             </div>
 
-            @if ($productionBatch->productions->count())
+            @if ($productionBatch->produksiBahanBakus->count())
 
                 <div class="card mb-4">
 
@@ -565,7 +565,7 @@
 
                         <h4>
                             <span class="step-badge">2</span>
-                            Production Detail
+                            Produksi Bahan Baku
                         </h4>
 
                     </div>
@@ -579,38 +579,55 @@
                                 <thead>
 
                                     <tr>
-                                        <th>Product</th>
+                                        <th>Bahan Baku</th>
+                                        <th>Formula</th>
                                         <th>Kode Batch</th>
-                                        <th class="text-right">Suhu</th>
-                                        <th class="text-right">Berat</th>
+                                        <th>Keterangan</th>
+                                        <th class="text-right">Total (Kg)</th>
                                     </tr>
 
                                 </thead>
 
                                 <tbody>
 
-                                    @foreach ($productionBatch->productions as $production)
-                                        @foreach ($production->details as $detail)
+                                    @foreach ($productionBatch->produksiBahanBakus as $produksiBahanBaku)
+                                        @forelse ($produksiBahanBaku->items as $item)
                                             <tr>
 
                                                 <td>
-                                                    {{ $detail->product->nama ?? '-' }}
+                                                    {{ $item->bahanBaku->name ?? '-' }}
                                                 </td>
 
                                                 <td>
-                                                    {{ $production->kode_batch ?? '-' }}
+                                                    {{ $item->productFormula->name ?? '-' }}
                                                 </td>
 
-                                                <td class="text-right">
-                                                    {{ $detail->suhu ?? '-' }}
+                                                <td>
+                                                    {{ $item->kode_batch ?? '-' }}
                                                 </td>
 
-                                                <td class="text-right">
-                                                    {{ $detail->berat_kg !== null ? number_format((float) $detail->berat_kg, 2, ',', '.') . ' Kg' : '-' }}
+                                                <td>
+                                                    {{ $item->keterangan ?? '-' }}
                                                 </td>
+
+                                                @if ($loop->first)
+                                                    <td class="text-right"
+                                                        rowspan="{{ $produksiBahanBaku->items->count() }}">
+                                                        {{ $produksiBahanBaku->total !== null ? number_format((float) $produksiBahanBaku->total, 2, ',', '.') . ' Kg' : '-' }}
+                                                    </td>
+                                                @endif
 
                                             </tr>
-                                        @endforeach
+                                        @empty
+                                            <tr>
+                                                <td colspan="4">
+                                                    <span class="value-empty">Tidak ada detail bahan baku.</span>
+                                                </td>
+                                                <td class="text-right">
+                                                    {{ $produksiBahanBaku->total !== null ? number_format((float) $produksiBahanBaku->total, 2, ',', '.') . ' Kg' : '-' }}
+                                                </td>
+                                            </tr>
+                                        @endforelse
                                     @endforeach
 
                                 </tbody>
@@ -2377,7 +2394,7 @@
 
                                             <thead>
                                                 <tr>
-                                                    <th>Product</th>
+                                                    <th>Bahan Baku</th>
                                                     <th>Jumlah</th>
                                                     <th>Pemakaian</th>
                                                     <th>Sisa</th>
@@ -2391,7 +2408,14 @@
                                                     <tr>
 
                                                         <td>
-                                                            {{ $plastik->product->nama ?? '-' }}
+                                                            @if ($plastik->bahanBaku)
+                                                                <strong>{{ $plastik->bahanBaku->kode ?? '-' }}</strong>
+                                                                <br>
+                                                                <small
+                                                                    class="text-muted">{{ $plastik->bahanBaku->name ?? '-' }}</small>
+                                                            @else
+                                                                -
+                                                            @endif
                                                         </td>
 
                                                         <td>
@@ -2578,7 +2602,7 @@
 
                                             <thead>
                                                 <tr>
-                                                    <th>Product</th>
+                                                    <th>Bahan Baku</th>
                                                     <th>Jumlah</th>
                                                     <th>Pemakaian</th>
                                                     <th>Sisa</th>
@@ -2593,7 +2617,14 @@
                                                     <tr>
 
                                                         <td>
-                                                            {{ $kemasan->product->nama ?? '-' }}
+                                                            @if ($kemasan->bahanBaku)
+                                                                <strong>{{ $kemasan->bahanBaku->kode ?? '-' }}</strong>
+                                                                <br>
+                                                                <small
+                                                                    class="text-muted">{{ $kemasan->bahanBaku->name ?? '-' }}</small>
+                                                            @else
+                                                                -
+                                                            @endif
                                                         </td>
 
                                                         <td>
@@ -2642,7 +2673,7 @@
                                             <thead>
                                                 <tr>
                                                     <th>No. Palet</th>
-                                                    <th>Product</th>
+                                                    <th>Bahan Baku</th>
                                                     <th>Jumlah Pack</th>
                                                     <th>Jumlah Box</th>
                                                     <th>Jumlah Kg</th>
@@ -2660,7 +2691,14 @@
                                                         </td>
 
                                                         <td>
-                                                            {{ $palet->product->nama ?? '-' }}
+                                                            @if ($palet->bahanBaku)
+                                                                <strong>{{ $palet->bahanBaku->kode ?? '-' }}</strong>
+                                                                <br>
+                                                                <small
+                                                                    class="text-muted">{{ $palet->bahanBaku->name ?? '-' }}</small>
+                                                            @else
+                                                                -
+                                                            @endif
                                                         </td>
 
                                                         <td>

@@ -686,7 +686,7 @@ class LaporanPengendalianProdukBelakangSheet implements
         $sheet->mergeCells("A{$row}:B{$row}");
         $sheet->setCellValue(
             "A{$row}",
-            'Product'
+            'Bahan Baku'
         );
 
         $sheet->setCellValue(
@@ -716,7 +716,7 @@ class LaporanPengendalianProdukBelakangSheet implements
 
             $sheet->setCellValue(
                 "A{$row}",
-                $plastik->product->nama ?? '-'
+                $this->bahanBakuLabel($plastik->bahanBaku)
             );
 
             $sheet->setCellValue(
@@ -769,7 +769,6 @@ class LaporanPengendalianProdukBelakangSheet implements
 
         return $row + 1;
     }
-
     protected function writePackingLuarSampling(
         $sheet,
         int $row,
@@ -890,7 +889,7 @@ class LaporanPengendalianProdukBelakangSheet implements
 
         $sheet->setCellValue(
             "I{$row}",
-            'Product'
+            'Bahan Baku'
         );
 
         $sheet->setCellValue(
@@ -927,7 +926,7 @@ class LaporanPengendalianProdukBelakangSheet implements
 
             $sheet->setCellValue(
                 "I{$row}",
-                $kemasan->product->nama ?? '-'
+                $this->bahanBakuLabel($kemasan->bahanBaku)
             );
 
             $sheet->setCellValue(
@@ -1014,7 +1013,7 @@ class LaporanPengendalianProdukBelakangSheet implements
 
         $sheet->setCellValue(
             "J{$row}",
-            'Product'
+            'Bahan Baku'
         );
 
         $sheet->setCellValue(
@@ -1051,7 +1050,7 @@ class LaporanPengendalianProdukBelakangSheet implements
 
             $sheet->setCellValue(
                 "J{$row}",
-                $palet->product->nama ?? '-'
+                $this->bahanBakuLabel($palet->bahanBaku)
             );
 
             $sheet->setCellValue(
@@ -1566,5 +1565,21 @@ class LaporanPengendalianProdukBelakangSheet implements
             0,
             5
         );
+    }
+
+    protected function bahanBakuLabel($bahanBaku): string
+    {
+        if (!$bahanBaku) {
+            return '-';
+        }
+
+        $kode = $bahanBaku->kode ?? null;
+        $name = $bahanBaku->name ?? null;
+
+        if ($kode && $name) {
+            return "{$kode} - {$name}";
+        }
+
+        return $kode ?: ($name ?: '-');
     }
 }

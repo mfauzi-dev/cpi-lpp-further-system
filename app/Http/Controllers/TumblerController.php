@@ -49,7 +49,7 @@ class TumblerController extends Controller
     public function managerDetail($id)
     {
         $tumbler = Tumbler::with([
-            'productionBatch.product.productGroup',
+            'productionBatch.product',
         ])->findOrFail($id);
 
         return view(
@@ -98,7 +98,7 @@ class TumblerController extends Controller
     public function create()
     {
         $productionBatches = ProductionBatch::with([
-            'product.productGroup',
+            'product',
         ])
             ->latest('tanggal_produksi')
             ->get();
@@ -112,7 +112,7 @@ class TumblerController extends Controller
     public function detail($id)
     {
         $tumbler = Tumbler::with([
-            'productionBatch.product.productGroup',
+            'productionBatch.product',
         ])->findOrFail($id);
 
         return view(
@@ -232,11 +232,11 @@ class TumblerController extends Controller
     public function edit($id)
     {
         $tumbler = Tumbler::with([
-            'productionBatch.product.productGroup',
+            'productionBatch.product',
         ])->findOrFail($id);
 
         $productionBatches = ProductionBatch::with([
-            'product.productGroup',
+            'product',
         ])
             ->latest('tanggal_produksi')
             ->get();

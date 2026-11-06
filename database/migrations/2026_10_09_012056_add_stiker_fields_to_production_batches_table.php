@@ -12,21 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('production_batches', function (Blueprint $table) {
-            $table->string('stiker_komposisi')
+            $table->string('kartu_rute')
                 ->nullable()
                 ->after('produktifitas');
 
-            $table->string('stiker_cppb_qi_bb')
+            $table->string('cppb_qi_bb')
                 ->nullable()
-                ->after('stiker_komposisi');
+                ->after('kartu_rute');
 
-            $table->string('stiker_bpom')
+            $table->string('komposisi')
                 ->nullable()
-                ->after('stiker_cppb_qi_bb');
+                ->after('cppb_qi_bb');
 
-            $table->string('stiker_kode_cetak')
+            $table->string('kode_cetak')
                 ->nullable()
-                ->after('stiker_bpom');
+                ->after('komposisi');
         });
     }
 
@@ -37,10 +37,10 @@ return new class extends Migration
     {
         Schema::table('production_batches', function (Blueprint $table) {
             $table->dropColumn([
-                'stiker_komposisi',
-                'stiker_cppb_qi_bb',
-                'stiker_bpom',
-                'stiker_kode_cetak',
+                'kartu_rute',
+                'cppb_qi_bb',
+                'komposisi',
+                'kode_cetak',
             ]);
         });
     }

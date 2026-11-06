@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BahanBaku;
 use App\Models\PackingDalam;
 use App\Models\PackingLuar;
 use App\Models\Product;
@@ -37,28 +38,20 @@ class PackingDalamController extends Controller
             });
         }
 
-        $packingDalams = $query
-            ->paginate(10)
-            ->withQueryString();
+        $packingDalams = $query->paginate(10)->withQueryString();
 
-        return view(
-            'pages.manager.packing-dalam.index',
-            compact('packingDalams')
-        );
+        return view('pages.manager.packing-dalam.index', compact('packingDalams'));
     }
 
     public function managerDetail($id)
     {
         $packingDalam = PackingDalam::with([
-            'productionBatch.product.productGroup',
+            'productionBatch.product',
             'samplings',
-            'plastiks.product',
+            'plastiks.bahanBaku',
         ])->findOrFail($id);
 
-        return view(
-            'pages.manager.packing-dalam.detail',
-            compact('packingDalam')
-        );
+        return view('pages.manager.packing-dalam.detail', compact('packingDalam'));
     }
 
     public function index(Request $request)
@@ -87,52 +80,34 @@ class PackingDalamController extends Controller
             });
         }
 
-        $packingDalams = $query
-            ->paginate(10)
-            ->withQueryString();
+        $packingDalams = $query->paginate(10)->withQueryString();
 
-        return view(
-            'pages.operator.packing-dalam.index',
-            compact('packingDalams')
-        );
+        return view('pages.operator.packing-dalam.index', compact('packingDalams'));
     }
 
     public function create()
     {
-        $productionBatches = ProductionBatch::with([
-            'product.productGroup',
-        ])
+        $productionBatches = ProductionBatch::with('product')
             ->latest('tanggal_produksi')
             ->get();
 
-        $productsPlastik = Product::whereHas('processType', function ($query) {
-            $query->where('name', 'Plastik');
-        })
-            ->with('productGroup')
-            ->orderBy('nama')
-            ->get();
+        $productsPlastik = BahanBaku::orderBy('name')->get();
 
         return view(
             'pages.operator.packing-dalam.create',
-            compact(
-                'productionBatches',
-                'productsPlastik'
-            )
+            compact('productionBatches', 'productsPlastik')
         );
     }
 
     public function detail($id)
     {
         $packingDalam = PackingDalam::with([
-            'productionBatch.product.productGroup',
+            'productionBatch.product',
             'samplings',
-            'plastiks.product.productGroup',
+            'plastiks.bahanBaku',
         ])->findOrFail($id);
 
-        return view(
-            'pages.operator.packing-dalam.detail',
-            compact('packingDalam')
-        );
+        return view('pages.operator.packing-dalam.detail', compact('packingDalam'));
     }
 
     public function store(Request $request)
@@ -246,10 +221,10 @@ class PackingDalamController extends Controller
                 'nullable',
                 'array',
             ],
-            'plastik.*.product_id' => [
+            'plastik.*.bahan_baku_id' => [
                 'nullable',
                 'integer',
-                'exists:products,id',
+                'exists:bahan_bakus,id',
             ],
             'plastik.*.jumlah' => [
                 'nullable',
@@ -287,9 +262,8 @@ class PackingDalamController extends Controller
         DB::beginTransaction();
 
         try {
-            $productionBatch = ProductionBatch::with([
-                'product.productGroup',
-            ])->findOrFail($request->production_batch_id);
+            $productionBatch = ProductionBatch::with('product')
+                ->findOrFail($request->production_batch_id);
 
             $packingDalam = PackingDalam::create([
                 'production_batch_id' => $productionBatch->id,
@@ -336,13 +310,7 @@ class PackingDalamController extends Controller
                 }
             }
 
-            $productsPlastik = Product::whereHas('processType', function ($query) {
-                $query->where('name', 'Plastik');
-            })
-                ->with('productGroup')
-                ->get();
-
-            $allowedProductIds = $productsPlastik->pluck('id')->toArray();
+            $allowedBahanBakuIds = BahanBaku::pluck('id')->toArray();
 
             $packingLuar = PackingLuar::with('palets')
                 ->where('production_batch_id', $productionBatch->id)
@@ -353,14 +321,36 @@ class PackingDalamController extends Controller
                 ? $packingLuar->palets->sum('jumlah_pack')
                 : 0;
 
+            $gramasi = (float) ($productionBatch->product->gramasi ?? 0);
+
+            $faktor = null;
+
+            if ($gramasi == 200) {
+                $faktor = 0.19;
+            } elseif ($gramasi == 225 || $gramasi == 250) {
+                $faktor = 0.20;
+            } elseif ($gramasi == 315 || $gramasi == 360) {
+                $faktor = 0.25;
+            } elseif (
+                $gramasi == 400 ||
+                $gramasi == 450 ||
+                $gramasi == 500
+            ) {
+                $faktor = 0.253;
+            } elseif ($gramasi == 900 || $gramasi == 1000) {
+                $faktor = 0.34;
+            }
+
+            $pemakaianDasar = $faktor !== null
+                ? $jumlahPack * $faktor
+                : null;
+
             $plastikData = $request->input('plastik', []);
 
             foreach ($plastikData as $plastik) {
-                $productId = $plastik['product_id'] ?? null;
+                $bahanBakuId = $plastik['bahan_baku_id'] ?? null;
 
-                if ($productId && in_array($productId, $allowedProductIds)) {
-                    $product = $productsPlastik->firstWhere('id', $productId);
-
+                if ($bahanBakuId && in_array($bahanBakuId, $allowedBahanBakuIds)) {
                     $jumlah = $plastik['jumlah'] ?? null;
                     $sisa = $plastik['sisa'] ?? null;
                     $rijek = $plastik['rijek'] ?? null;
@@ -370,55 +360,14 @@ class PackingDalamController extends Controller
 
                     $pemakaian = null;
 
-                    if ($product && $jumlahPack > 0) {
-                        $gramasi = (float) $product->gramasi;
+                    if ($pemakaianDasar !== null && $jumlahPack > 0) {
+                        $pemakaian = $pemakaianDasar;
 
-                        $productGroup = strtolower(
-                            trim($product->productGroup->name ?? '')
-                        );
-
-                        $faktor = null;
-
-                        if ($productGroup === 'stick') {
-                            if ($gramasi == 225 || $gramasi == 250) {
-                                $faktor = 0.215;
-                            }
-                        } elseif ($productGroup === 'nugget') {
-                            if ($gramasi == 225 || $gramasi == 250) {
-                                $faktor = 0.2;
-                            }
-                        } else {
-                            if ($gramasi == 200) {
-                                $faktor = 0.19;
-                            } elseif ($gramasi == 225 || $gramasi == 250) {
-                                $faktor = 0.2;
-                            } elseif ($gramasi == 315 || $gramasi == 360) {
-                                $faktor = 0.25;
-                            } elseif (
-                                $gramasi == 400 ||
-                                $gramasi == 450 ||
-                                $gramasi == 500
-                            ) {
-                                $faktor = 0.253;
-                            } elseif (
-                                $gramasi == 900 ||
-                                $gramasi == 1000
-                            ) {
-                                $faktor = 0.34;
-                            }
+                        if (filled($rijek)) {
+                            $pemakaian += $pemakaianDasar * ((float) $rijek / 100);
                         }
 
-                        if ($faktor !== null) {
-                            $pemakaianDasar = $jumlahPack * $faktor;
-                            $pemakaian = $pemakaianDasar;
-
-                            if (filled($rijek)) {
-                                $pemakaian = $pemakaianDasar
-                                    + ($pemakaianDasar * ((float) $rijek / 100));
-                            }
-
-                            $pemakaian = round($pemakaian, 2);
-                        }
+                        $pemakaian = round($pemakaian, 2);
                     }
 
                     if (
@@ -431,7 +380,7 @@ class PackingDalamController extends Controller
                         filled($leader)
                     ) {
                         $packingDalam->plastiks()->create([
-                            'product_id' => $productId,
+                            'bahan_baku_id' => $bahanBakuId,
                             'jumlah' => $jumlah ?: null,
                             'pemakaian' => $pemakaian,
                             'sisa' => $sisa ?: null,
@@ -448,201 +397,70 @@ class PackingDalamController extends Controller
 
             return redirect()
                 ->route('operator.packing-dalam.index')
-                ->with(
-                    'success',
-                    'Data packing dalam berhasil disimpan.'
-                );
+                ->with('success', 'Data packing dalam berhasil disimpan.');
         } catch (\Throwable $e) {
             DB::rollBack();
 
             return redirect()
                 ->back()
                 ->withInput()
-                ->with(
-                    'error',
-                    'Gagal menyimpan data: ' . $e->getMessage()
-                );
+                ->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
         }
     }
 
     public function edit($id)
     {
         $packingDalam = PackingDalam::with([
-            'productionBatch.product.productGroup',
+            'productionBatch.product',
             'samplings',
-            'plastiks.product.productGroup',
+            'plastiks.bahanBaku',
         ])->findOrFail($id);
 
-        $productionBatches = ProductionBatch::with([
-            'product.productGroup',
-        ])
+        $productionBatches = ProductionBatch::with('product')
             ->latest('tanggal_produksi')
             ->get();
 
-        $productsPlastik = Product::whereHas('processType', function ($query) {
-            $query->where('name', 'Plastik');
-        })
-            ->with('productGroup')
-            ->orderBy('nama')
-            ->get();
+        $productsPlastik = BahanBaku::orderBy('name')->get();
 
         return view(
             'pages.operator.packing-dalam.edit',
-            compact(
-                'packingDalam',
-                'productionBatches',
-                'productsPlastik'
-            )
+            compact('packingDalam', 'productionBatches', 'productsPlastik')
         );
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'production_batch_id' => [
-                'required',
-                'exists:production_batches,id',
-            ],
-            'mhw_korin' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-            'heating_level' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-            'speed' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-            'pressure' => [
-                'nullable',
-            ],
-            'packing_manual' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-            'timbangan' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-            'heating_level_packing_manual' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-            'fe_sus_non_fe' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-            'setting_x' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-            'setting_y' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-            'checkweigher_pac' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-            'petugas_sortasi_after_iqf' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-            'operator_md' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-            'leader_produksi' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-            'waktu_awal' => [
-                'nullable',
-                'date_format:H:i',
-            ],
-            'waktu_akhir' => [
-                'nullable',
-                'date_format:H:i',
-            ],
-            'pic_produksi' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-            'sampling' => [
-                'nullable',
-                'array',
-            ],
-            'sampling.*.berat_kemasan' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-            'sampling.*.berat_per_bag' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-            'sampling.*.range_berat' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-            'plastik' => [
-                'nullable',
-                'array',
-            ],
-            'plastik.*.product_id' => [
-                'nullable',
-                'integer',
-                'exists:products,id',
-            ],
-            'plastik.*.jumlah' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-            'plastik.*.sisa' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-            'plastik.*.rijek' => [
-                'nullable',
-                'numeric',
-                'min:0',
-                'max:100',
-            ],
-            'plastik.*.operator_mhw' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-            'plastik.*.checker_ds' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-            'plastik.*.leader' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
+            'production_batch_id' => ['required', 'exists:production_batches,id'],
+            'mhw_korin' => ['nullable', 'string', 'max:100'],
+            'heating_level' => ['nullable', 'numeric', 'min:0'],
+            'speed' => ['nullable', 'numeric', 'min:0'],
+            'pressure' => ['nullable'],
+            'packing_manual' => ['nullable', 'string', 'max:100'],
+            'timbangan' => ['nullable', 'string', 'max:100'],
+            'heating_level_packing_manual' => ['nullable', 'numeric', 'min:0'],
+            'fe_sus_non_fe' => ['nullable', 'string', 'max:100'],
+            'setting_x' => ['nullable', 'numeric', 'min:0'],
+            'setting_y' => ['nullable', 'numeric', 'min:0'],
+            'checkweigher_pac' => ['nullable', 'string', 'max:100'],
+            'petugas_sortasi_after_iqf' => ['nullable', 'string', 'max:100'],
+            'operator_md' => ['nullable', 'string', 'max:100'],
+            'leader_produksi' => ['nullable', 'string', 'max:100'],
+            'waktu_awal' => ['nullable', 'date_format:H:i'],
+            'waktu_akhir' => ['nullable', 'date_format:H:i'],
+            'pic_produksi' => ['nullable', 'string', 'max:100'],
+            'sampling' => ['nullable', 'array'],
+            'sampling.*.berat_kemasan' => ['nullable', 'numeric', 'min:0'],
+            'sampling.*.berat_per_bag' => ['nullable', 'numeric', 'min:0'],
+            'sampling.*.range_berat' => ['nullable', 'string', 'max:100'],
+            'plastik' => ['nullable', 'array'],
+            'plastik.*.bahan_baku_id' => ['nullable', 'integer', 'exists:bahan_bakus,id'],
+            'plastik.*.jumlah' => ['nullable', 'numeric', 'min:0'],
+            'plastik.*.sisa' => ['nullable', 'numeric', 'min:0'],
+            'plastik.*.rijek' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'plastik.*.operator_mhw' => ['nullable', 'string', 'max:100'],
+            'plastik.*.checker_ds' => ['nullable', 'string', 'max:100'],
+            'plastik.*.leader' => ['nullable', 'string', 'max:100'],
         ]);
 
         DB::beginTransaction();
@@ -650,9 +468,8 @@ class PackingDalamController extends Controller
         try {
             $packingDalam = PackingDalam::findOrFail($id);
 
-            $productionBatch = ProductionBatch::with([
-                'product.productGroup',
-            ])->findOrFail($request->production_batch_id);
+            $productionBatch = ProductionBatch::with('product')
+                ->findOrFail($request->production_batch_id);
 
             $packingDalam->update([
                 'production_batch_id' => $productionBatch->id,
@@ -703,13 +520,7 @@ class PackingDalamController extends Controller
 
             $packingDalam->plastiks()->delete();
 
-            $productsPlastik = Product::whereHas('processType', function ($query) {
-                $query->where('name', 'Plastik');
-            })
-                ->with('productGroup')
-                ->get();
-
-            $allowedProductIds = $productsPlastik->pluck('id')->toArray();
+            $allowedBahanBakuIds = BahanBaku::pluck('id')->toArray();
 
             $packingLuar = PackingLuar::with('palets')
                 ->where('production_batch_id', $productionBatch->id)
@@ -720,14 +531,32 @@ class PackingDalamController extends Controller
                 ? $packingLuar->palets->sum('jumlah_pack')
                 : 0;
 
+            $gramasi = (float) ($productionBatch->product->gramasi ?? 0);
+
+            $faktor = null;
+
+            if ($gramasi == 200) {
+                $faktor = 0.19;
+            } elseif ($gramasi == 225 || $gramasi == 250) {
+                $faktor = 0.20;
+            } elseif ($gramasi == 315 || $gramasi == 360) {
+                $faktor = 0.25;
+            } elseif ($gramasi == 400 || $gramasi == 450 || $gramasi == 500) {
+                $faktor = 0.253;
+            } elseif ($gramasi == 900 || $gramasi == 1000) {
+                $faktor = 0.34;
+            }
+
+            $pemakaianDasar = $faktor !== null
+                ? $jumlahPack * $faktor
+                : null;
+
             $plastikData = $request->input('plastik', []);
 
             foreach ($plastikData as $plastik) {
-                $productId = $plastik['product_id'] ?? null;
+                $bahanBakuId = $plastik['bahan_baku_id'] ?? null;
 
-                if ($productId && in_array($productId, $allowedProductIds)) {
-                    $product = $productsPlastik->firstWhere('id', $productId);
-
+                if ($bahanBakuId && in_array($bahanBakuId, $allowedBahanBakuIds)) {
                     $jumlah = $plastik['jumlah'] ?? null;
                     $sisa = $plastik['sisa'] ?? null;
                     $rijek = $plastik['rijek'] ?? null;
@@ -737,55 +566,14 @@ class PackingDalamController extends Controller
 
                     $pemakaian = null;
 
-                    if ($product && $jumlahPack > 0) {
-                        $gramasi = (float) $product->gramasi;
+                    if ($pemakaianDasar !== null && $jumlahPack > 0) {
+                        $pemakaian = $pemakaianDasar;
 
-                        $productGroup = strtolower(
-                            trim($product->productGroup->name ?? '')
-                        );
-
-                        $faktor = null;
-
-                        if ($productGroup === 'stick') {
-                            if ($gramasi == 225 || $gramasi == 250) {
-                                $faktor = 0.215;
-                            }
-                        } elseif ($productGroup === 'nugget') {
-                            if ($gramasi == 225 || $gramasi == 250) {
-                                $faktor = 0.2;
-                            }
-                        } else {
-                            if ($gramasi == 200) {
-                                $faktor = 0.19;
-                            } elseif ($gramasi == 225 || $gramasi == 250) {
-                                $faktor = 0.2;
-                            } elseif ($gramasi == 315 || $gramasi == 360) {
-                                $faktor = 0.25;
-                            } elseif (
-                                $gramasi == 400 ||
-                                $gramasi == 450 ||
-                                $gramasi == 500
-                            ) {
-                                $faktor = 0.253;
-                            } elseif (
-                                $gramasi == 900 ||
-                                $gramasi == 1000
-                            ) {
-                                $faktor = 0.34;
-                            }
+                        if (filled($rijek)) {
+                            $pemakaian += $pemakaianDasar * ((float) $rijek / 100);
                         }
 
-                        if ($faktor !== null) {
-                            $pemakaianDasar = $jumlahPack * $faktor;
-                            $pemakaian = $pemakaianDasar;
-
-                            if (filled($rijek)) {
-                                $pemakaian = $pemakaianDasar
-                                    + ($pemakaianDasar * ((float) $rijek / 100));
-                            }
-
-                            $pemakaian = round($pemakaian, 2);
-                        }
+                        $pemakaian = round($pemakaian, 2);
                     }
 
                     if (
@@ -798,7 +586,7 @@ class PackingDalamController extends Controller
                         filled($leader)
                     ) {
                         $packingDalam->plastiks()->create([
-                            'product_id' => $productId,
+                            'bahan_baku_id' => $bahanBakuId,
                             'jumlah' => $jumlah ?: null,
                             'pemakaian' => $pemakaian,
                             'sisa' => $sisa ?: null,
@@ -815,20 +603,14 @@ class PackingDalamController extends Controller
 
             return redirect()
                 ->route('operator.packing-dalam.index')
-                ->with(
-                    'success',
-                    'Data packing dalam berhasil diperbarui.'
-                );
+                ->with('success', 'Data packing dalam berhasil diperbarui.');
         } catch (\Throwable $e) {
             DB::rollBack();
 
             return redirect()
                 ->back()
                 ->withInput()
-                ->with(
-                    'error',
-                    'Gagal memperbarui data: ' . $e->getMessage()
-                );
+                ->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
         }
     }
 
@@ -845,19 +627,13 @@ class PackingDalamController extends Controller
 
             return redirect()
                 ->route('operator.packing-dalam.index')
-                ->with(
-                    'success',
-                    'Data packing dalam berhasil dihapus.'
-                );
+                ->with('success', 'Data packing dalam berhasil dihapus.');
         } catch (\Throwable $e) {
             DB::rollBack();
 
             return redirect()
                 ->route('operator.packing-dalam.index')
-                ->with(
-                    'error',
-                    'Gagal menghapus data: ' . $e->getMessage()
-                );
+                ->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
     }
 }

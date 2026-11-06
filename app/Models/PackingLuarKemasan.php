@@ -11,7 +11,7 @@ class PackingLuarKemasan extends Model
 
     protected $fillable = [
         'packing_luar_id',
-        'product_id',
+        'bahan_baku_id',
         'jumlah',
         'pemakaian',
         'sisa',
@@ -31,8 +31,8 @@ class PackingLuarKemasan extends Model
         return $this->belongsTo(PackingLuar::class);
     }
 
-    public function product()
+    public function bahanBaku()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(BahanBaku::class);
     }
 }

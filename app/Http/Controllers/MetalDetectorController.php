@@ -47,7 +47,7 @@ class MetalDetectorController extends Controller
     public function create()
     {
         $productionBatches = ProductionBatch::with([
-            'product.productGroup',
+            'product',
         ])
             ->latest('tanggal_produksi')
             ->get();
@@ -61,7 +61,7 @@ class MetalDetectorController extends Controller
     public function detail($id)
     {
         $productionBatch = ProductionBatch::with([
-            'product.productGroup',
+            'product',
             'metalDetectors',
         ])->findOrFail($id);
 
@@ -171,12 +171,12 @@ class MetalDetectorController extends Controller
     public function edit($id)
     {
         $productionBatch = ProductionBatch::with([
-            'product.productGroup',
+            'product',
             'metalDetectors',
         ])->findOrFail($id);
 
         $productionBatches = ProductionBatch::with([
-            'product.productGroup',
+            'product',
         ])
             ->latest('tanggal_produksi')
             ->get();
@@ -338,7 +338,7 @@ class MetalDetectorController extends Controller
     public function managerDetail($id)
     {
         $productionBatch = ProductionBatch::with([
-            'product.productGroup',
+            'product',
             'metalDetectors',
         ])->findOrFail($id);
 

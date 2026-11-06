@@ -19,10 +19,10 @@ class ProductionBatch extends Model
         'yield',
         'persen_rijek',
         'produktifitas',
-        'stiker_komposisi',
-        'stiker_cppb_qi_bb',
-        'stiker_bpom',
-        'stiker_kode_cetak',
+        'kartu_rute',
+        'cppb_qi_bb',
+        'komposisi',
+        'kode_cetak',
     ];
 
     protected $casts = [
@@ -36,6 +36,11 @@ class ProductionBatch extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function produksiBahanBakus()
+    {
+        return $this->hasMany(ProduksiBahanBaku::class);
     }
 
     public function formings()

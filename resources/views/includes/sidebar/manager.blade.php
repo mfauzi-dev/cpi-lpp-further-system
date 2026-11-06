@@ -39,17 +39,17 @@
                 </a>
             </li>
 
+            <li class="{{ Request::routeIs('manager.produksi-bahan-baku.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('manager.produksi-bahan-baku.index') }}">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Produksi Bahan Baku</span>
+                </a>
+            </li>
+
             <li class="{{ Request::routeIs('manager.suhu-ruang.*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('manager.suhu-ruang.index') }}">
                     <i class="bi bi-thermometer-half"></i>
                     <span>Suhu Ruang</span>
-                </a>
-            </li>
-
-            <li class="{{ Request::routeIs('manager.production.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('manager.production.index') }}">
-                    <i class="bi bi-box-seam"></i>
-                    <span>Produksi Bahan Baku</span>
                 </a>
             </li>
 

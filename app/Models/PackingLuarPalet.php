@@ -9,9 +9,9 @@ class PackingLuarPalet extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+     protected $fillable = [
         'packing_luar_id',
-        'product_id',
+        'bahan_baku_id',
         'no_palet',
         'jumlah_pack',
         'jumlah_box',
@@ -40,8 +40,8 @@ class PackingLuarPalet extends Model
         return $this->belongsTo(PackingLuar::class);
     }
 
-    public function product()
+    public function bahanBaku()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(BahanBaku::class);
     }
 }

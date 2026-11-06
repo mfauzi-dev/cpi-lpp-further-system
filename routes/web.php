@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BahanBakuController;
 use App\Http\Controllers\BatterController;
 use App\Http\Controllers\ProductionBatchController;
 use App\Http\Controllers\BowlCutterController;
@@ -19,8 +20,10 @@ use App\Http\Controllers\PredustBreaderController;
 use App\Http\Controllers\PreparasiFlaController;
 use App\Http\Controllers\ProcessTypeController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductFormulaController;
 use App\Http\Controllers\ProductGroupController;
 use App\Http\Controllers\ProductionController;
+use App\Http\Controllers\ProduksiBahanBakuController;
 use App\Http\Controllers\SuhuRuangController;
 use App\Http\Controllers\TumblerController;
 use App\Http\Controllers\UserController;
@@ -38,6 +41,7 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/production/get-products/{processTypeId}', [ProductionController::class, 'getProducts'])->name('get-products');
     Route::get('/production-batch/by-date/{date}', [ProductionBatchController::class, 'getByDate'])->name('production-batch.by-date');
     Route::get('/dashboard/manager/export', [DashboardController::class, 'exportManager'])->name('dashboard.manager.export');
+    Route::get('/produksi-bahan-baku/get-formulas/{productionBatchId}', [ProduksiBahanBakuController::class, 'getFormulas'])->name('produksi-bahan-baku.get-formulas');
 });
 
 Route::prefix('admin-production')->middleware(['auth', 'role:Admin Production'])->group(function() {
@@ -48,17 +52,6 @@ Route::prefix('admin-production')->middleware(['auth', 'role:Admin Production'])
         Route::get('/{id}/edit', [ProductGroupController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ProductGroupController::class, 'update'])->name('update');
         Route::delete('/{id}', [ProductGroupController::class, 'destroy'])->name('destroy');
-    });
-
-    Route::prefix('product')->name('admin-production.product.')->group(function () {
-        Route::get('/', [ProductController::class, 'index'])->name('index');
-        Route::get('/create', [ProductController::class, 'create'])->name('create');
-        Route::post('/', [ProductController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [ProductController::class, 'update'])->name('update');
-        Route::delete('/{id}', [ProductController::class, 'destroy'])->name('destroy');
-        Route::get('/import', [ProductController::class, 'importPage'])->name('import');
-        Route::post('/import', [ProductController::class, 'upload'])->name('upload');
     });
 
     Route::prefix('process-type')->name('admin-production.process-type.')->group(function () {
@@ -83,6 +76,52 @@ Route::prefix('operator')->middleware(['auth', 'role:Operator'])->group(function
         Route::get('/{id}/export', [ProductionBatchController::class, 'export'])->name('production-batch.export');  
         Route::get('/{id}/export-pdf', [ProductionBatchController::class, 'exportPdf'])->name('operator.production-batch.export-pdf');  
     });
+
+    Route::prefix('product')->group(function () {
+        Route::get('/', [ProductController::class, 'index'])->name('operator.product.index');
+        Route::get('/create', [ProductController::class, 'create'])->name('operator.product.create');
+        Route::post('/', [ProductController::class, 'store'])->name('operator.product.store');
+        Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('operator.product.edit');
+        Route::put('/{id}', [ProductController::class, 'update'])->name('operator.product.update');
+        Route::delete('/{id}', [ProductController::class, 'destroy'])->name('operator.product.destroy');
+        Route::get('/import', [ProductController::class, 'importPage'])->name('operator.product.import');
+        Route::post('/import', [ProductController::class, 'upload'])->name('operator.product.upload');
+
+        Route::get('/formula/import', [ProductFormulaController::class, 'importPage'])->name('operator.product.formula.import');
+        Route::post('/formula/import', [ProductFormulaController::class, 'upload'])->name('operator.product.formula.upload');
+
+        Route::get('/{product}/formula', [ProductFormulaController::class, 'index'])->name('operator.product.formula.index');
+        Route::post('/{product}/formula/store', [ProductFormulaController::class, 'store'])->name('operator.product.formula.store');
+        Route::put('/formula/{id}/update', [ProductFormulaController::class, 'update'])->name('operator.product.formula.update');
+        Route::delete('/formula/{id}/delete', [ProductFormulaController::class, 'destroy'])->name('operator.product.formula.destroy');
+        Route::get('/{product}/bahan-baku-json', [ProductFormulaController::class, 'getBahanBakuByProduct'])->name('operator.product.bahan-baku-json');
+    });
+
+    Route::prefix('bahan-baku')->name('operator.bahan-baku.')->group(function () {
+        Route::get('/', [BahanBakuController::class, 'index'])->name('index');
+        Route::get('/create', [BahanBakuController::class, 'create'])->name('create');
+        Route::post('/', [BahanBakuController::class, 'store'])->name('store');
+        Route::get('/{id}/detail', [BahanBakuController::class, 'detail'])->name('detail');
+        Route::get('/{id}/edit', [BahanBakuController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [BahanBakuController::class, 'update'])->name('update');
+        Route::delete('/{id}', [BahanBakuController::class, 'destroy'])->name('destroy');
+        Route::delete('/bulk-destroy', [BahanBakuController::class, 'bulkDestroy'])->name('bulk-destroy');
+
+        Route::get('/import', [BahanBakuController::class, 'importPage'])->name('import');
+        Route::post('/import', [BahanBakuController::class, 'upload'])->name('upload');
+    });
+
+    Route::prefix('produksi-bahan-baku')->group(function () {
+        Route::get('/', [ProduksiBahanBakuController::class, 'index'])->name('operator.produksi-bahan-baku.index');
+        Route::get('/create', [ProduksiBahanBakuController::class, 'create'])->name('operator.produksi-bahan-baku.create');
+        Route::post('/', [ProduksiBahanBakuController::class, 'store'])->name('operator.produksi-bahan-baku.store');
+        Route::get('/{id}/detail', [ProduksiBahanBakuController::class, 'detail'])->name('operator.produksi-bahan-baku.detail');
+        Route::get('/{id}/edit', [ProduksiBahanBakuController::class, 'edit'])->name('operator.produksi-bahan-baku.edit');
+        Route::put('/{id}', [ProduksiBahanBakuController::class, 'update'])->name('operator.produksi-bahan-baku.update');
+        Route::delete('/{id}', [ProduksiBahanBakuController::class, 'destroy'])->name('operator.produksi-bahan-baku.destroy');
+        Route::delete('/bulk-destroy-items', [ProduksiBahanBakuController::class, 'bulkDestroyItems'])->name('operator.produksi-bahan-baku.bulk-destroy-items');
+    });
+
     Route::prefix('production')->group(function () {
         Route::get('/', [ProductionController::class, 'index'])->name('operator.production.index');
         Route::get('/create', [ProductionController::class, 'create'])->name('operator.production.create');
@@ -261,13 +300,19 @@ Route::prefix('manager')->middleware(['auth', 'role:Manager,General Manager'])->
         Route::get('/{id}/export', [ProductionBatchController::class, 'managerExport'])->name('manager.production-batch.export');
         Route::get('/{id}/export-pdf', [ProductionBatchController::class, 'managerExportPdf'])->name('manager.production-batch.export-pdf');
     });
-        Route::prefix('user')->group(function () {
+
+    Route::prefix('user')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('manager.user.index');
         Route::get('/create', [UserController::class, 'create'])->name('manager.user.create');
         Route::post('/store', [UserController::class, 'store'])->name('manager.user.store');
         Route::get('/{id}/edit', [UserController::class, 'edit'])->name('manager.user.edit');
         Route::put('/{id}/update', [UserController::class, 'update'])->name('manager.user.update');
         Route::delete('/{id}/delete', [UserController::class, 'destroy'])->name('manager.user.destroy');
+    });
+
+    Route::prefix('produksi-bahan-baku')->group(function () {
+        Route::get('/', [ProduksiBahanBakuController::class, 'managerIndex'])->name('manager.produksi-bahan-baku.index');
+        Route::get('/{id}/detail', [ProduksiBahanBakuController::class, 'managerDetail'])->name('manager.produksi-bahan-baku.detail');
     });
 
     Route::prefix('production')->group(function () {

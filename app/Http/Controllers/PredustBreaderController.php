@@ -49,7 +49,7 @@ class PredustBreaderController extends Controller
     public function managerDetail($id)
     {
         $predustBreader = PredustBreader::with([
-            'productionBatch.product.productGroup',
+            'productionBatch.product',
         ])->findOrFail($id);
 
         return view(
@@ -99,7 +99,7 @@ class PredustBreaderController extends Controller
     public function create()
     {
         $productionBatches = ProductionBatch::with([
-            'product.productGroup',
+            'product',
         ])
             ->latest('tanggal_produksi')
             ->get();
@@ -113,7 +113,7 @@ class PredustBreaderController extends Controller
     public function detail($id)
     {
         $predustBreader = PredustBreader::with([
-            'productionBatch.product.productGroup',
+            'productionBatch.product',
         ])->findOrFail($id);
 
         return view(
@@ -212,11 +212,11 @@ class PredustBreaderController extends Controller
     public function edit($id)
     {
         $predustBreader = PredustBreader::with([
-            'productionBatch.product.productGroup',
+            'productionBatch.product',
         ])->findOrFail($id);
 
         $productionBatches = ProductionBatch::with([
-            'product.productGroup',
+            'product',
         ])
             ->latest('tanggal_produksi')
             ->get();

@@ -13,16 +13,10 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_product')->nullable();
+            $table->string('kode')->nullable();
             $table->string('nama');
-            $table->decimal('gramasi', 10, 2)
-                ->nullable();
-            $table->unsignedInteger('pack_per_box')
-                ->nullable();
-            $table->foreignId('product_group_id')->nullable()
-                ->constrained('product_groups')->nullOnDelete();
-            $table->foreignId('process_type_id')->nullable()
-                ->constrained('process_types')->nullOnDelete();
+            $table->decimal('gramasi', 10, 2)->nullable();
+            $table->unsignedInteger('pack_per_box')->nullable();
             $table->timestamps();
         });
     }

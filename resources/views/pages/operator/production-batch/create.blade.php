@@ -39,24 +39,18 @@
                     </ul>
 
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-
                         <span aria-hidden="true">&times;</span>
-
                     </button>
                 </div>
             @endif
 
             @if (session('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-
                     {{ session('error') }}
 
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-
                         <span aria-hidden="true">&times;</span>
-
                     </button>
-
                 </div>
             @endif
 
@@ -82,7 +76,6 @@
                             <div class="col-md-8">
 
                                 <div class="form-group">
-
                                     <label class="filter-label">
                                         Product
                                     </label>
@@ -90,16 +83,12 @@
                                     <select name="product_id" id="product_id"
                                         class="form-control select2 @error('product_id') is-invalid @enderror">
 
-                                        <option value="">
-                                            Pilih Product
-                                        </option>
+                                        <option value="">Pilih Product</option>
 
                                         @foreach ($products as $product)
                                             <option value="{{ $product->id }}"
                                                 {{ old('product_id') == $product->id ? 'selected' : '' }}>
-
                                                 {{ $product->kode_product ? $product->kode_product . ' - ' : '' }}{{ $product->nama }}
-
                                             </option>
                                         @endforeach
 
@@ -110,7 +99,6 @@
                                             {{ $message }}
                                         </div>
                                     @enderror
-
                                 </div>
 
                             </div>
@@ -118,7 +106,6 @@
                             <div class="col-md-4">
 
                                 <div class="form-group">
-
                                     <label class="filter-label">
                                         Tanggal Produksi
                                     </label>
@@ -132,7 +119,6 @@
                                             {{ $message }}
                                         </div>
                                     @enderror
-
                                 </div>
 
                             </div>
@@ -144,7 +130,6 @@
                             <div class="col-md-6">
 
                                 <div class="form-group">
-
                                     <label class="filter-label">
                                         No Batch
                                     </label>
@@ -162,7 +147,6 @@
                                     <small class="form-text text-muted">
                                         Masukkan nomor batch sesuai batch produksi.
                                     </small>
-
                                 </div>
 
                             </div>
@@ -170,7 +154,6 @@
                             <div class="col-md-6">
 
                                 <div class="form-group">
-
                                     <label class="filter-label">
                                         Line
                                     </label>
@@ -184,7 +167,6 @@
                                             {{ $message }}
                                         </div>
                                     @enderror
-
                                 </div>
 
                             </div>
@@ -196,7 +178,6 @@
                             <div class="col-md-12">
 
                                 <div class="form-group">
-
                                     <label class="filter-label">
                                         Tipe Proses
                                         <span class="text-danger">*</span>
@@ -232,7 +213,6 @@
                                     <small class="form-text text-muted">
                                         Menentukan proses awal untuk perhitungan waktu kerja.
                                     </small>
-
                                 </div>
 
                             </div>
@@ -259,24 +239,27 @@
 
                 </div>
 
-
                 {{-- STIKER --}}
                 <div class="card mb-4">
+
                     <div class="card-header">
                         <h4>
                             <span class="step-badge">+</span>
                             Stiker yang Ditempel
                         </h4>
                     </div>
+
                     <div class="card-body">
+
                         <p class="text-muted mb-4">
                             Upload foto atau scan stiker sesuai posisi penempelannya.
                             Perhatikan pembagian stiker untuk lembar depan dan lembar belakang.
                             Semua stiker boleh dikosongkan.
                         </p>
 
-                        {{-- STIKER LEMBAR DEPAN --}}
+                        {{-- LEMBAR DEPAN --}}
                         <div class="card border mb-4">
+
                             <div class="card-header bg-light">
                                 <h6 class="mb-0">
                                     <i class="fas fa-file-alt mr-2"></i>
@@ -284,27 +267,37 @@
                                     <span class="badge badge-primary ml-2">1 Stiker</span>
                                 </h6>
                             </div>
+
                             <div class="card-body">
+
                                 <div class="form-group mb-0">
+
                                     <label class="filter-label">
                                         Kartu Rute
                                     </label>
-                                    <input type="file" name="stiker_komposisi" accept="image/*"
-                                        class="form-control @error('stiker_komposisi') is-invalid @enderror">
-                                    @error('stiker_komposisi')
+
+                                    <input type="file" name="kartu_rute" accept="image/*"
+                                        class="form-control @error('kartu_rute') is-invalid @enderror">
+
+                                    @error('kartu_rute')
                                         <div class="invalid-feedback">
                                             {{ $message }}
                                         </div>
                                     @enderror
+
                                     <small class="form-text text-muted">
-                                        Upload foto atau scan Label Komposisi untuk lembar depan.
+                                        Upload foto atau scan Kartu Rute untuk lembar depan.
                                     </small>
+
                                 </div>
+
                             </div>
+
                         </div>
 
-                        {{-- STIKER LEMBAR BELAKANG --}}
+                        {{-- LEMBAR BELAKANG --}}
                         <div class="card border mb-0">
+
                             <div class="card-header bg-light">
                                 <h6 class="mb-0">
                                     <i class="fas fa-file-alt mr-2"></i>
@@ -312,56 +305,82 @@
                                     <span class="badge badge-secondary ml-2">3 Stiker</span>
                                 </h6>
                             </div>
+
                             <div class="card-body">
+
                                 <div class="row">
+
                                     <div class="col-md-4 col-12 mb-3">
+
                                         <div class="form-group mb-0">
+
                                             <label class="filter-label">
                                                 CPPB / QI / BB
                                             </label>
-                                            <input type="file" name="stiker_cppb_qi_bb" accept="image/*"
-                                                class="form-control @error('stiker_cppb_qi_bb') is-invalid @enderror">
-                                            @error('stiker_cppb_qi_bb')
+
+                                            <input type="file" name="cppb_qi_bb" accept="image/*"
+                                                class="form-control @error('cppb_qi_bb') is-invalid @enderror">
+
+                                            @error('cppb_qi_bb')
                                                 <div class="invalid-feedback">
                                                     {{ $message }}
                                                 </div>
                                             @enderror
+
                                         </div>
+
                                     </div>
 
                                     <div class="col-md-4 col-12 mb-3">
+
                                         <div class="form-group mb-0">
+
                                             <label class="filter-label">
                                                 Komposisi
                                             </label>
-                                            <input type="file" name="stiker_bpom" accept="image/*"
-                                                class="form-control @error('stiker_bpom') is-invalid @enderror">
-                                            @error('stiker_bpom')
+
+                                            <input type="file" name="komposisi" accept="image/*"
+                                                class="form-control @error('komposisi') is-invalid @enderror">
+
+                                            @error('komposisi')
                                                 <div class="invalid-feedback">
                                                     {{ $message }}
                                                 </div>
                                             @enderror
+
                                         </div>
+
                                     </div>
 
                                     <div class="col-md-4 col-12 mb-0">
+
                                         <div class="form-group mb-0">
+
                                             <label class="filter-label">
                                                 Kode Cetak
                                             </label>
-                                            <input type="file" name="stiker_kode_cetak" accept="image/*"
-                                                class="form-control @error('stiker_kode_cetak') is-invalid @enderror">
-                                            @error('stiker_kode_cetak')
+
+                                            <input type="file" name="kode_cetak" accept="image/*"
+                                                class="form-control @error('kode_cetak') is-invalid @enderror">
+
+                                            @error('kode_cetak')
                                                 <div class="invalid-feedback">
                                                     {{ $message }}
                                                 </div>
                                             @enderror
+
                                         </div>
+
                                     </div>
+
                                 </div>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </div>
 
                 {{-- STEP 2 --}}
@@ -381,7 +400,6 @@
                             <div class="col-md-6 mb-3">
 
                                 <div class="info-box">
-
                                     <div class="info-label">
                                         Waktu Kerja
                                     </div>
@@ -393,7 +411,6 @@
                                     <small class="text-muted d-block mt-2">
                                         Otomatis dihitung dari proses awal (sesuai tipe proses) sampai Packing Luar.
                                     </small>
-
                                 </div>
 
                             </div>
@@ -401,7 +418,6 @@
                             <div class="col-md-6 mb-3">
 
                                 <div class="info-box">
-
                                     <div class="info-label">
                                         Yield
                                     </div>
@@ -413,7 +429,6 @@
                                     <small class="text-muted d-block mt-2">
                                         Akan dihitung otomatis berdasarkan hasil produksi.
                                     </small>
-
                                 </div>
 
                             </div>
@@ -421,7 +436,6 @@
                             <div class="col-md-6">
 
                                 <div class="info-box">
-
                                     <div class="info-label">
                                         Persen Rijek
                                     </div>
@@ -433,7 +447,6 @@
                                     <small class="text-muted d-block mt-2">
                                         Akan dihitung otomatis berdasarkan data rijek.
                                     </small>
-
                                 </div>
 
                             </div>
@@ -441,7 +454,6 @@
                             <div class="col-md-6">
 
                                 <div class="info-box">
-
                                     <div class="info-label">
                                         Produktifitas
                                     </div>
@@ -453,7 +465,6 @@
                                     <small class="text-muted d-block mt-2">
                                         Akan dihitung otomatis dari data proses produksi.
                                     </small>
-
                                 </div>
 
                             </div>
@@ -478,7 +489,6 @@
                                 </div>
 
                                 <div>
-
                                     <div class="stat-label">
                                         Production Batch
                                     </div>
@@ -486,7 +496,6 @@
                                     <div class="stat-value">
                                         Siap disimpan
                                     </div>
-
                                 </div>
 
                             </div>
@@ -494,17 +503,13 @@
                             <div class="action-buttons">
 
                                 <a href="{{ route('operator.production-batch.index') }}" class="btn btn-ghost">
-
                                     <i class="fas fa-arrow-left mr-1"></i>
                                     Batal
-
                                 </a>
 
                                 <button type="submit" class="btn btn-add">
-
                                     <i class="fas fa-save mr-1"></i>
                                     Simpan Production Batch
-
                                 </button>
 
                             </div>
@@ -526,12 +531,10 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-
             $('.select2').select2({
                 width: '100%',
                 placeholder: 'Pilih Product'
             });
-
         });
     </script>
 @endpush

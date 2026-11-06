@@ -172,7 +172,7 @@
 
                                         <td>
                                             <span class="badge-value">
-                                                {{ $packingLuar->productionBatch->product->kode_product ?? '-' }}
+                                                {{ $packingLuar->productionBatch->product->kode ?? '-' }}
                                             </span>
                                         </td>
 

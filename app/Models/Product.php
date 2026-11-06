@@ -10,10 +10,8 @@ class Product extends Model
     use HasFactory;
 
       protected $fillable = [
-        'kode_product',
+        'kode',
         'nama',
-        'product_group_id',
-        'process_type_id',
         'gramasi',
         'pack_per_box',
     ];
@@ -23,13 +21,8 @@ class Product extends Model
         'pack_per_box' => 'integer',
     ];
 
-    public function productGroup()
+    public function formulas()
     {
-        return $this->belongsTo(ProductGroup::class);
-    }
-
-    public function processType()
-    {
-        return $this->belongsTo(ProcessType::class);
+        return $this->hasMany(ProductFormula::class);
     }
 }

@@ -613,7 +613,7 @@
                                 <thead class="text-center">
                                     <tr>
                                         <th>No</th>
-                                        <th>Product</th>
+                                        <th>Bahan Baku</th>
                                         <th>Jumlah</th>
                                         <th>Pemakaian</th>
                                         <th>Sisa</th>
@@ -630,11 +630,11 @@
                                             </td>
 
                                             <td>
-                                                @if ($kemasan->product)
-                                                    <strong>{{ $kemasan->product->kode_product ?? '-' }}</strong>
+                                                @if ($kemasan->bahanBaku)
+                                                    <strong>{{ $kemasan->bahanBaku->kode ?? '-' }}</strong>
                                                     <br>
                                                     <small class="text-muted">
-                                                        {{ $kemasan->product->nama ?? '-' }}
+                                                        {{ $kemasan->bahanBaku->name ?? '-' }}
                                                     </small>
                                                 @else
                                                     -
@@ -694,7 +694,7 @@
                                 <thead class="text-center">
                                     <tr>
                                         <th>No</th>
-                                        <th>Product</th>
+                                        <th>Bahan Baku</th>
                                         <th>No BSTB</th>
                                         <th>Jumlah Box</th>
                                         <th>Jumlah Pack</th>
@@ -715,11 +715,11 @@
                                             </td>
 
                                             <td>
-                                                @if ($palet->product)
-                                                    <strong>{{ $palet->product->kode_product ?? '-' }}</strong>
+                                                @if ($palet->bahanBaku)
+                                                    <strong>{{ $palet->bahanBaku->kode ?? '-' }}</strong>
                                                     <br>
                                                     <small class="text-muted">
-                                                        {{ $palet->product->nama ?? '-' }}
+                                                        {{ $palet->bahanBaku->name ?? '-' }}
                                                     </small>
                                                 @else
                                                     -

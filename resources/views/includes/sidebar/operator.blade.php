@@ -24,6 +24,22 @@
                 </a>
             </li>
 
+            <li class="menu-header">Master Data</li>
+
+            <li class="{{ Request::routeIs('operator.bahan-baku.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('operator.bahan-baku.index') }}">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Bahan Baku</span>
+                </a>
+            </li>
+
+            <li class="{{ Request::routeIs('operator.product.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('operator.product.index') }}">
+                    <i class="bi bi-boxes"></i>
+                    <span>Produk & Formula</span>
+                </a>
+            </li>
+
             <li class="menu-header">Operational</li>
 
             <li class="{{ Request::routeIs('operator.production-batch.*') ? 'active' : '' }}">
@@ -40,8 +56,8 @@
                 </a>
             </li>
 
-            <li class="{{ Request::routeIs('operator.production.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('operator.production.index') }}">
+            <li class="{{ Request::routeIs('operator.produksi-bahan-baku.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('operator.produksi-bahan-baku.index') }}">
                     <i class="bi bi-box-seam"></i>
                     <span>Produksi Bahan Baku</span>
                 </a>

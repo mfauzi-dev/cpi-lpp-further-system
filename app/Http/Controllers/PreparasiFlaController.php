@@ -49,7 +49,7 @@ class PreparasiFlaController extends Controller
     public function managerDetail($id)
     {
         $preparasiFla = PreparasiFla::with([
-            'productionBatch.product.productGroup',
+            'productionBatch.product',
         ])->findOrFail($id);
 
         return view(
@@ -98,7 +98,7 @@ class PreparasiFlaController extends Controller
     public function create()
     {
         $productionBatches = ProductionBatch::with([
-            'product.productGroup',
+            'product',
         ])
             ->latest('tanggal_produksi')
             ->get();
@@ -112,7 +112,7 @@ class PreparasiFlaController extends Controller
     public function detail($id)
     {
         $preparasiFla = PreparasiFla::with([
-            'productionBatch.product.productGroup',
+            'productionBatch.product',
         ])->findOrFail($id);
 
         return view(
@@ -222,11 +222,11 @@ class PreparasiFlaController extends Controller
     public function edit($id)
     {
         $preparasiFla = PreparasiFla::with([
-            'productionBatch.product.productGroup',
+            'productionBatch.product',
         ])->findOrFail($id);
 
         $productionBatches = ProductionBatch::with([
-            'product.productGroup',
+            'product',
         ])
             ->latest('tanggal_produksi')
             ->get();

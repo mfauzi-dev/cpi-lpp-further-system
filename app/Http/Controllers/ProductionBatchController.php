@@ -55,8 +55,9 @@ class ProductionBatchController extends Controller
             return [
                 'id' => $batch->id,
                 'no_batch' => $batch->no_batch,
-                'kode_product' => $batch->product->kode_product ?? '-',
+                'kode_product' => $batch->product->kode ?? '-',
                 'product' => $batch->product->nama ?? '-',
+                'pack_per_box' => $batch->product->pack_per_box,
                 'line' => $batch->line ?? '-',
                 'waktu_kerja' => $batch->waktu_kerja,
                 'tanggal_produksi' => $batch->tanggal_produksi->format('Y-m-d'),
@@ -176,7 +177,7 @@ class ProductionBatchController extends Controller
     public function managerDetail($id)
     {
         $productionBatch = ProductionBatch::with([
-            'product.productGroup',
+            'product',
             'formings',
             'bowlCutters',
             'grinders',
@@ -203,7 +204,7 @@ class ProductionBatchController extends Controller
     public function detail($id)
     {
         $productionBatch = ProductionBatch::with([
-            'product.productGroup',
+            'product',
             'formings',
             'bowlCutters',
             'grinders',
@@ -229,7 +230,7 @@ class ProductionBatchController extends Controller
 
     public function create()
     {
-        $products = Product::with('productGroup')
+        $products = Product::with('formulas')
             ->orderBy('nama')
             ->get();
 
@@ -247,34 +248,30 @@ class ProductionBatchController extends Controller
             'tanggal_produksi' => ['required', 'date'],
             'line' => ['nullable', 'string', 'max:100'],
             'tipe_proses' => ['nullable', 'in:forming,non_forming,non_forming_roasted'],
-            'stiker_komposisi' => ['nullable', 'image', 'max:2048'],
-            'stiker_cppb_qi_bb' => ['nullable', 'image', 'max:2048'],
-            'stiker_bpom' => ['nullable', 'image', 'max:2048'],
-            'stiker_kode_cetak' => ['nullable', 'image', 'max:2048'],
+            'kartu_rute' => ['nullable', 'image', 'max:2048'],
+            'cppb_qi_bb' => ['nullable', 'image', 'max:2048'],
+            'komposisi' => ['nullable', 'image', 'max:2048'],
+            'kode_cetak' => ['nullable', 'image', 'max:2048'],
         ]);
 
         DB::beginTransaction();
 
         try {
-            $stikerKomposisiPath = null;
-            if ($request->hasFile('stiker_komposisi')) {
-                $stikerKomposisiPath = $request->file('stiker_komposisi')->store('stiker', 'public');
-            }
+            $kartuRutePath = $request->hasFile('kartu_rute')
+                ? $request->file('kartu_rute')->store('stiker', 'public')
+                : null;
 
-            $stikerCppbQiBbPath = null;
-            if ($request->hasFile('stiker_cppb_qi_bb')) {
-                $stikerCppbQiBbPath = $request->file('stiker_cppb_qi_bb')->store('stiker', 'public');
-            }
+            $cppbQiBbPath = $request->hasFile('cppb_qi_bb')
+                ? $request->file('cppb_qi_bb')->store('stiker', 'public')
+                : null;
 
-            $stikerBpomPath = null;
-            if ($request->hasFile('stiker_bpom')) {
-                $stikerBpomPath = $request->file('stiker_bpom')->store('stiker', 'public');
-            }
+            $komposisiPath = $request->hasFile('komposisi')
+                ? $request->file('komposisi')->store('stiker', 'public')
+                : null;
 
-            $stikerKodeCetakPath = null;
-            if ($request->hasFile('stiker_kode_cetak')) {
-                $stikerKodeCetakPath = $request->file('stiker_kode_cetak')->store('stiker', 'public');
-            }
+            $kodeCetakPath = $request->hasFile('kode_cetak')
+                ? $request->file('kode_cetak')->store('stiker', 'public')
+                : null;
 
             ProductionBatch::create([
                 'product_id' => $request->product_id,
@@ -286,10 +283,10 @@ class ProductionBatchController extends Controller
                 'yield' => null,
                 'persen_rijek' => null,
                 'produktifitas' => null,
-                'stiker_komposisi' => $stikerKomposisiPath,
-                'stiker_cppb_qi_bb' => $stikerCppbQiBbPath,
-                'stiker_bpom' => $stikerBpomPath,
-                'stiker_kode_cetak' => $stikerKodeCetakPath,
+                'kartu_rute' => $kartuRutePath,
+                'cppb_qi_bb' => $cppbQiBbPath,
+                'komposisi' => $komposisiPath,
+                'kode_cetak' => $kodeCetakPath,
             ]);
 
             DB::commit();
@@ -310,10 +307,10 @@ class ProductionBatchController extends Controller
     public function edit($id)
     {
         $productionBatch = ProductionBatch::with(
-            'product.productGroup'
+            'product.formulas'
         )->findOrFail($id);
 
-        $products = Product::with('productGroup')
+        $products = Product::with('formulas')
             ->orderBy('nama')
             ->get();
 
@@ -334,10 +331,10 @@ class ProductionBatchController extends Controller
             'tanggal_produksi' => ['required', 'date'],
             'line' => ['nullable', 'string', 'max:100'],
             'tipe_proses' => ['required', 'in:forming,non_forming,non_forming_roasted'],
-            'stiker_komposisi' => ['nullable', 'image', 'max:2048'],
-            'stiker_cppb_qi_bb' => ['nullable', 'image', 'max:2048'],
-            'stiker_bpom' => ['nullable', 'image', 'max:2048'],
-            'stiker_kode_cetak' => ['nullable', 'image', 'max:2048'],
+            'kartu_rute' => ['nullable', 'image', 'max:2048'],
+            'cppb_qi_bb' => ['nullable', 'image', 'max:2048'],
+            'komposisi' => ['nullable', 'image', 'max:2048'],
+            'kode_cetak' => ['nullable', 'image', 'max:2048'],
         ]);
 
         DB::beginTransaction();
@@ -345,56 +342,64 @@ class ProductionBatchController extends Controller
         try {
             $productionBatch = ProductionBatch::findOrFail($id);
 
-            $stikerKomposisiPath = $productionBatch->stiker_komposisi;
-            if ($request->hasFile('stiker_komposisi')) {
-                if ($stikerKomposisiPath) {
-                    Storage::disk('public')->delete($stikerKomposisiPath);
+            $kartuRutePath = $productionBatch->kartu_rute;
+            if ($request->hasFile('kartu_rute')) {
+                if ($kartuRutePath) {
+                    Storage::disk('public')->delete($kartuRutePath);
                 }
-                $stikerKomposisiPath = $request->file('stiker_komposisi')->store('stiker', 'public');
-            } elseif ($request->boolean('hapus_stiker_komposisi')) {
-                if ($stikerKomposisiPath) {
-                    Storage::disk('public')->delete($stikerKomposisiPath);
+
+                $kartuRutePath = $request->file('kartu_rute')->store('stiker', 'public');
+            } elseif ($request->boolean('hapus_kartu_rute')) {
+                if ($kartuRutePath) {
+                    Storage::disk('public')->delete($kartuRutePath);
                 }
-                $stikerKomposisiPath = null;
+
+                $kartuRutePath = null;
             }
 
-            $stikerCppbQiBbPath = $productionBatch->stiker_cppb_qi_bb;
-            if ($request->hasFile('stiker_cppb_qi_bb')) {
-                if ($stikerCppbQiBbPath) {
-                    Storage::disk('public')->delete($stikerCppbQiBbPath);
+            $cppbQiBbPath = $productionBatch->cppb_qi_bb;
+            if ($request->hasFile('cppb_qi_bb')) {
+                if ($cppbQiBbPath) {
+                    Storage::disk('public')->delete($cppbQiBbPath);
                 }
-                $stikerCppbQiBbPath = $request->file('stiker_cppb_qi_bb')->store('stiker', 'public');
-            } elseif ($request->boolean('hapus_stiker_cppb_qi_bb')) {
-                if ($stikerCppbQiBbPath) {
-                    Storage::disk('public')->delete($stikerCppbQiBbPath);
+
+                $cppbQiBbPath = $request->file('cppb_qi_bb')->store('stiker', 'public');
+            } elseif ($request->boolean('hapus_cppb_qi_bb')) {
+                if ($cppbQiBbPath) {
+                    Storage::disk('public')->delete($cppbQiBbPath);
                 }
-                $stikerCppbQiBbPath = null;
+
+                $cppbQiBbPath = null;
             }
 
-            $stikerBpomPath = $productionBatch->stiker_bpom;
-            if ($request->hasFile('stiker_bpom')) {
-                if ($stikerBpomPath) {
-                    Storage::disk('public')->delete($stikerBpomPath);
+            $komposisiPath = $productionBatch->komposisi;
+            if ($request->hasFile('komposisi')) {
+                if ($komposisiPath) {
+                    Storage::disk('public')->delete($komposisiPath);
                 }
-                $stikerBpomPath = $request->file('stiker_bpom')->store('stiker', 'public');
-            } elseif ($request->boolean('hapus_stiker_bpom')) {
-                if ($stikerBpomPath) {
-                    Storage::disk('public')->delete($stikerBpomPath);
+
+                $komposisiPath = $request->file('komposisi')->store('stiker', 'public');
+            } elseif ($request->boolean('hapus_komposisi')) {
+                if ($komposisiPath) {
+                    Storage::disk('public')->delete($komposisiPath);
                 }
-                $stikerBpomPath = null;
+
+                $komposisiPath = null;
             }
 
-            $stikerKodeCetakPath = $productionBatch->stiker_kode_cetak;
-            if ($request->hasFile('stiker_kode_cetak')) {
-                if ($stikerKodeCetakPath) {
-                    Storage::disk('public')->delete($stikerKodeCetakPath);
+            $kodeCetakPath = $productionBatch->kode_cetak;
+            if ($request->hasFile('kode_cetak')) {
+                if ($kodeCetakPath) {
+                    Storage::disk('public')->delete($kodeCetakPath);
                 }
-                $stikerKodeCetakPath = $request->file('stiker_kode_cetak')->store('stiker', 'public');
-            } elseif ($request->boolean('hapus_stiker_kode_cetak')) {
-                if ($stikerKodeCetakPath) {
-                    Storage::disk('public')->delete($stikerKodeCetakPath);
+
+                $kodeCetakPath = $request->file('kode_cetak')->store('stiker', 'public');
+            } elseif ($request->boolean('hapus_kode_cetak')) {
+                if ($kodeCetakPath) {
+                    Storage::disk('public')->delete($kodeCetakPath);
                 }
-                $stikerKodeCetakPath = null;
+
+                $kodeCetakPath = null;
             }
 
             $productionBatch->update([
@@ -403,10 +408,10 @@ class ProductionBatchController extends Controller
                 'tanggal_produksi' => $request->tanggal_produksi,
                 'line' => $request->line,
                 'tipe_proses' => $request->tipe_proses,
-                'stiker_komposisi' => $stikerKomposisiPath,
-                'stiker_cppb_qi_bb' => $stikerCppbQiBbPath,
-                'stiker_bpom' => $stikerBpomPath,
-                'stiker_kode_cetak' => $stikerKodeCetakPath,
+                'kartu_rute' => $kartuRutePath,
+                'cppb_qi_bb' => $cppbQiBbPath,
+                'komposisi' => $komposisiPath,
+                'kode_cetak' => $kodeCetakPath,
             ]);
 
             DB::commit();
@@ -466,7 +471,7 @@ class ProductionBatchController extends Controller
     public function exportPdf($id)
     {
         $productionBatch = ProductionBatch::with([
-            'product.productGroup',
+            'product',
             'pembekuans',
             'packingDalams.samplings',
             'packingDalams.plastiks.product',
@@ -501,7 +506,7 @@ class ProductionBatchController extends Controller
     public function managerExportPdf($id)
     {
         $productionBatch = ProductionBatch::with([
-            'product.productGroup',
+            'product',
             'pembekuans',
             'packingDalams.samplings',
             'packingDalams.plastiks.product',

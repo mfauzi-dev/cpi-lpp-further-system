@@ -2,28 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BahanBaku;
 use App\Models\PackingLuar;
 use App\Models\PackingLuarKemasan;
 use App\Models\PackingLuarPalet;
 use App\Models\PackingLuarSampling;
-use App\Models\Product;
 use App\Models\ProductionBatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PackingLuarController extends Controller
 {
-    public function index(Request $request)
+     public function index(Request $request)
     {
         $query = PackingLuar::with('productionBatch.product');
 
         if ($request->filled('kode_product')) {
             $query->whereHas('productionBatch.product', function ($q) use ($request) {
-                $q->where(
-                    'kode_product',
-                    'like',
-                    '%' . $request->kode_product . '%'
-                );
+                $q->where('kode_product', 'like', '%' . $request->kode_product . '%');
             });
         }
 
@@ -35,32 +31,19 @@ class PackingLuarController extends Controller
 
         if ($request->filled('date_from')) {
             $query->whereHas('productionBatch', function ($q) use ($request) {
-                $q->whereDate(
-                    'tanggal_produksi',
-                    '>=',
-                    $request->date_from
-                );
+                $q->whereDate('tanggal_produksi', '>=', $request->date_from);
             });
         }
 
         if ($request->filled('date_to')) {
             $query->whereHas('productionBatch', function ($q) use ($request) {
-                $q->whereDate(
-                    'tanggal_produksi',
-                    '<=',
-                    $request->date_to
-                );
+                $q->whereDate('tanggal_produksi', '<=', $request->date_to);
             });
         }
 
-        $packingLuars = $query
-            ->latest()
-            ->paginate(10);
+        $packingLuars = $query->latest()->paginate(10);
 
-        return view(
-            'pages.operator.packing-luar.index',
-            compact('packingLuars')
-        );
+        return view('pages.operator.packing-luar.index', compact('packingLuars'));
     }
 
     public function managerIndex(Request $request)
@@ -91,29 +74,21 @@ class PackingLuarController extends Controller
             });
         }
 
-        $packingLuars = $query
-            ->paginate(10)
-            ->withQueryString();
+        $packingLuars = $query->paginate(10)->withQueryString();
 
-        return view(
-            'pages.manager.packing-luar.index',
-            compact('packingLuars')
-        );
+        return view('pages.manager.packing-luar.index', compact('packingLuars'));
     }
 
     public function managerDetail($id)
     {
         $packingLuar = PackingLuar::with([
-            'productionBatch.product.productGroup',
+            'productionBatch.product',
             'samplings',
-            'kemasans.product.productGroup',
-            'palets.product.productGroup',
+            'kemasans.bahanBaku',
+            'palets.bahanBaku',
         ])->findOrFail($id);
 
-        return view(
-            'pages.manager.packing-luar.detail',
-            compact('packingLuar')
-        );
+        return view('pages.manager.packing-luar.detail', compact('packingLuar'));
     }
 
     public function create()
@@ -123,28 +98,19 @@ class PackingLuarController extends Controller
             ->orderBy('no_batch')
             ->get();
 
-        $productsKemasan = Product::orderBy('nama')->get();
+        $productsKemasan = BahanBaku::orderBy('name')->get();
+        $productsPalet = BahanBaku::orderBy('name')->get();
 
-        $productsPalet = Product::whereHas('processType', function ($query) {
-                            $query->where('name', 'CARTON BOX');
-                        })
-                        ->orderBy('nama')
-                        ->get();
-
-        return view(
-            'pages.operator.packing-luar.create',
-            compact(
-                'productionBatches',
-                'productsKemasan',
-                'productsPalet'
-            )
-        );
+        return view('pages.operator.packing-luar.create', compact(
+            'productionBatches',
+            'productsKemasan',
+            'productsPalet'
+        ));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'tanggal_produksi' => 'required|date',
             'production_batch_id' => 'required|exists:production_batches,id',
             'pengisian_ke_dalam_box' => 'nullable|string|max:255',
             'sealer_box' => 'nullable|string|max:255',
@@ -158,7 +124,7 @@ class PackingLuarController extends Controller
             'sampling.*.berat_per_box' => 'nullable|numeric|min:0',
             'sampling.*.range_berat' => 'nullable|string|max:255',
             'kemasan' => 'nullable|array',
-            'kemasan.*.product_id' => 'required|exists:products,id',
+            'kemasan.*.bahan_baku_id' => 'nullable|exists:bahan_bakus,id',
             'kemasan.*.jumlah' => 'nullable|numeric|min:0',
             'kemasan.*.pemakaian' => 'nullable|numeric|min:0',
             'kemasan.*.sisa' => 'nullable|numeric|min:0',
@@ -166,11 +132,11 @@ class PackingLuarController extends Controller
             'kemasan.*.petugas' => 'nullable|string|max:255',
             'palet' => 'nullable|array',
             'palet.*.no_palet' => 'nullable|integer|min:1',
-            'palet.*.product_id' => 'required|exists:products,id',
+            'palet.*.bahan_baku_id' => 'nullable|exists:bahan_bakus,id',
             'palet.*.jumlah_pack' => 'nullable|integer|min:0',
             'palet.*.jumlah_box' => 'nullable|numeric|min:0',
             'palet.*.jumlah_kg' => 'nullable|numeric|min:0',
-            'palet.*.no_bstb' => 'required|string|max:255',
+            'palet.*.no_bstb' => 'required_with:palet.*.bahan_baku_id|string|max:255',
             'palet.*.jumlah_wip_keluar_bag' => 'nullable|numeric|min:0',
             'palet.*.jumlah_wip_keluar_kg' => 'nullable|numeric|min:0',
             'palet.*.jumlah_wip_keluar_lot' => 'nullable|numeric|min:0',
@@ -179,7 +145,6 @@ class PackingLuarController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-
             $packingLuar = PackingLuar::create([
                 'production_batch_id' => $request->production_batch_id,
                 'pengisian_ke_dalam_box' => $request->pengisian_ke_dalam_box,
@@ -207,12 +172,8 @@ class PackingLuarController extends Controller
                         $waktuAwalPackingLuar->addDay();
                     }
 
-                    $waktuKerja = $waktuMulaiForming->diffInMinutes(
-                        $waktuAwalPackingLuar
-                    );
-
                     $productionBatch->update([
-                        'waktu_kerja' => $waktuKerja,
+                        'waktu_kerja' => $waktuMulaiForming->diffInMinutes($waktuAwalPackingLuar),
                     ]);
                 }
             }
@@ -238,13 +199,13 @@ class PackingLuarController extends Controller
 
             if ($request->filled('kemasan')) {
                 foreach ($request->kemasan as $kemasan) {
-                    if (empty($kemasan['product_id'])) {
+                    if (empty($kemasan['bahan_baku_id'])) {
                         continue;
                     }
 
                     PackingLuarKemasan::create([
                         'packing_luar_id' => $packingLuar->id,
-                        'product_id' => $kemasan['product_id'],
+                        'bahan_baku_id' => $kemasan['bahan_baku_id'],
                         'jumlah' => $kemasan['jumlah'] ?? null,
                         'pemakaian' => $kemasan['pemakaian'] ?? null,
                         'sisa' => $kemasan['sisa'] ?? null,
@@ -254,27 +215,30 @@ class PackingLuarController extends Controller
                 }
             }
 
+            $batchProduct = ProductionBatch::with('product')
+                ->find($request->production_batch_id)
+                ?->product;
+
             if ($request->filled('palet')) {
                 foreach ($request->palet as $index => $palet) {
-                    if (empty($palet['product_id'])) {
+                    if (empty($palet['bahan_baku_id'])) {
                         continue;
                     }
 
-                    $product = Product::find($palet['product_id']);
                     $jumlahBox = $palet['jumlah_box'] ?? null;
                     $jumlahPack = null;
 
                     if (
-                        $product &&
-                        $product->pack_per_box !== null &&
+                        $batchProduct &&
+                        $batchProduct->pack_per_box !== null &&
                         $jumlahBox !== null
                     ) {
-                        $jumlahPack = $product->pack_per_box * $jumlahBox;
+                        $jumlahPack = $batchProduct->pack_per_box * $jumlahBox;
                     }
 
                     PackingLuarPalet::create([
                         'packing_luar_id' => $packingLuar->id,
-                        'product_id' => $palet['product_id'],
+                        'bahan_baku_id' => $palet['bahan_baku_id'],
                         'no_palet' => $palet['no_palet'] ?? ($index + 1),
                         'jumlah_pack' => $jumlahPack,
                         'jumlah_box' => $jumlahBox,
@@ -289,32 +253,24 @@ class PackingLuarController extends Controller
                 }
             }
 
-            // Hitung ulang Yield Production Batch
             $productionBatch = ProductionBatch::with([
                 'productions',
                 'packingLuars.palets',
                 'kemasanRijeks',
             ])->findOrFail($request->production_batch_id);
 
-            $grandTotalBahanBaku = $productionBatch->productions
-                ->sum('total_bahan_baku');
+            $grandTotalBahanBaku = $productionBatch->productions->sum('total_bahan_baku');
 
             $totalKgPackingLuarPalet = $productionBatch->packingLuars
                 ->sum(function ($packingLuar) {
                     return $packingLuar->palets->sum('jumlah_kg');
                 });
 
-            $totalRijekPacking = $productionBatch->kemasanRijeks
-                ->sum('total_rijek_packing_kg');
+            $totalRijekPacking = $productionBatch->kemasanRijeks->sum('total_rijek_packing_kg');
 
-            if ($grandTotalBahanBaku > 0) {
-                $productionBatch->yield = (
-                    ($totalKgPackingLuarPalet + $totalRijekPacking)
-                    / $grandTotalBahanBaku
-                ) * 100;
-            } else {
-                $productionBatch->yield = 0;
-            }
+            $productionBatch->yield = $grandTotalBahanBaku > 0
+                ? (($totalKgPackingLuarPalet + $totalRijekPacking) / $grandTotalBahanBaku) * 100
+                : 0;
 
             $productionBatch->save();
         });
@@ -329,14 +285,11 @@ class PackingLuarController extends Controller
         $packingLuar = PackingLuar::with([
             'productionBatch.product',
             'samplings',
-            'kemasans.product',
-            'palets.product',
+            'kemasans.bahanBaku',
+            'palets.bahanBaku',
         ])->findOrFail($id);
 
-        return view(
-            'pages.operator.packing-luar.detail',
-            compact('packingLuar')
-        );
+        return view('pages.operator.packing-luar.detail', compact('packingLuar'));
     }
 
     public function edit($id)
@@ -344,8 +297,8 @@ class PackingLuarController extends Controller
         $packingLuar = PackingLuar::with([
             'productionBatch.product',
             'samplings',
-            'kemasans.product',
-            'palets.product',
+            'kemasans.bahanBaku',
+            'palets.bahanBaku',
         ])->findOrFail($id);
 
         $productionBatches = ProductionBatch::with('product')
@@ -353,25 +306,20 @@ class PackingLuarController extends Controller
             ->orderBy('no_batch')
             ->get();
 
-        $productsKemasan = Product::orderBy('nama')->get();
+        $productsKemasan = BahanBaku::orderBy('name')->get();
+        $productsPalet = BahanBaku::orderBy('name')->get();
 
-        $productsPalet = Product::orderBy('nama')->get();
-
-        return view(
-            'pages.operator.packing-luar.edit',
-            compact(
-                'packingLuar',
-                'productionBatches',
-                'productsKemasan',
-                'productsPalet'
-            )
-        );
+        return view('pages.operator.packing-luar.edit', compact(
+            'packingLuar',
+            'productionBatches',
+            'productsKemasan',
+            'productsPalet'
+        ));
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'tanggal_produksi' => 'required|date',
             'production_batch_id' => 'required|exists:production_batches,id',
             'pengisian_ke_dalam_box' => 'nullable|string|max:255',
             'sealer_box' => 'nullable|string|max:255',
@@ -385,7 +333,7 @@ class PackingLuarController extends Controller
             'sampling.*.berat_per_box' => 'nullable|numeric|min:0',
             'sampling.*.range_berat' => 'nullable|string|max:255',
             'kemasan' => 'nullable|array',
-            'kemasan.*.product_id' => 'required|exists:products,id',
+            'kemasan.*.bahan_baku_id' => 'nullable|exists:bahan_bakus,id',
             'kemasan.*.jumlah' => 'nullable|numeric|min:0',
             'kemasan.*.pemakaian' => 'nullable|numeric|min:0',
             'kemasan.*.sisa' => 'nullable|numeric|min:0',
@@ -393,11 +341,11 @@ class PackingLuarController extends Controller
             'kemasan.*.petugas' => 'nullable|string|max:255',
             'palet' => 'nullable|array',
             'palet.*.no_palet' => 'nullable|integer|min:1',
-            'palet.*.product_id' => 'required|exists:products,id',
+            'palet.*.bahan_baku_id' => 'nullable|exists:bahan_bakus,id',
             'palet.*.jumlah_pack' => 'nullable|integer|min:0',
             'palet.*.jumlah_box' => 'nullable|numeric|min:0',
             'palet.*.jumlah_kg' => 'nullable|numeric|min:0',
-            'palet.*.no_bstb' => 'required|string|max:255',
+            'palet.*.no_bstb' => 'required_with:palet.*.bahan_baku_id|string|max:255',
             'palet.*.jumlah_wip_keluar_bag' => 'nullable|numeric|min:0',
             'palet.*.jumlah_wip_keluar_kg' => 'nullable|numeric|min:0',
             'palet.*.jumlah_wip_keluar_lot' => 'nullable|numeric|min:0',
@@ -406,7 +354,6 @@ class PackingLuarController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $id) {
-
             $packingLuar = PackingLuar::findOrFail($id);
 
             $packingLuar->update([
@@ -422,41 +369,27 @@ class PackingLuarController extends Controller
 
             if (!empty($request->waktu_awal)) {
                 $productionBatch = ProductionBatch::with([
-                        'formings',
-                        'batters',
-                        'predustBreaders',
-                        'hlts',
-                    ])->findOrFail($request->production_batch_id);
+                    'formings',
+                    'batters',
+                    'predustBreaders',
+                    'hlts',
+                ])->findOrFail($request->production_batch_id);
 
                 $proses = null;
 
                 if ($productionBatch->tipe_proses === 'forming') {
-
-                    $proses = $productionBatch->formings
-                        ->sortBy('waktu_mulai')
-                        ->first();
-
+                    $proses = $productionBatch->formings->sortBy('waktu_mulai')->first();
                 } elseif ($productionBatch->tipe_proses === 'non_forming') {
-
-                    $proses = $productionBatch->batters
-                        ->sortBy('waktu_mulai')
-                        ->first();
+                    $proses = $productionBatch->batters->sortBy('waktu_mulai')->first();
 
                     if (!$proses) {
-                        $proses = $productionBatch->predustBreaders
-                            ->sortBy('waktu_mulai')
-                            ->first();
+                        $proses = $productionBatch->predustBreaders->sortBy('waktu_mulai')->first();
                     }
-
                 } elseif ($productionBatch->tipe_proses === 'non_forming_roasted') {
-
-                    $proses = $productionBatch->hlts
-                        ->sortBy('waktu_mulai')
-                        ->first();
+                    $proses = $productionBatch->hlts->sortBy('waktu_mulai')->first();
                 }
 
                 if ($proses && !empty($proses->waktu_mulai)) {
-
                     $tanggal = $productionBatch->tanggal_produksi->format('Y-m-d');
 
                     $waktuMulai = \Carbon\Carbon::parse($tanggal . ' ' . $proses->waktu_mulai);
@@ -466,10 +399,8 @@ class PackingLuarController extends Controller
                         $waktuAwalPackingLuar->addDay();
                     }
 
-                    $waktuKerja = $waktuMulai->diffInMinutes($waktuAwalPackingLuar);
-
                     $productionBatch->update([
-                        'waktu_kerja' => $waktuKerja,
+                        'waktu_kerja' => $waktuMulai->diffInMinutes($waktuAwalPackingLuar),
                     ]);
                 }
             }
@@ -499,13 +430,13 @@ class PackingLuarController extends Controller
 
             if ($request->filled('kemasan')) {
                 foreach ($request->kemasan as $kemasan) {
-                    if (empty($kemasan['product_id'])) {
+                    if (empty($kemasan['bahan_baku_id'])) {
                         continue;
                     }
 
                     PackingLuarKemasan::create([
                         'packing_luar_id' => $packingLuar->id,
-                        'product_id' => $kemasan['product_id'],
+                        'bahan_baku_id' => $kemasan['bahan_baku_id'],
                         'jumlah' => $kemasan['jumlah'] ?? null,
                         'pemakaian' => $kemasan['pemakaian'] ?? null,
                         'sisa' => $kemasan['sisa'] ?? null,
@@ -515,27 +446,30 @@ class PackingLuarController extends Controller
                 }
             }
 
+            $batchProduct = ProductionBatch::with('product')
+                ->find($request->production_batch_id)
+                ?->product;
+
             if ($request->filled('palet')) {
                 foreach ($request->palet as $index => $palet) {
-                    if (empty($palet['product_id'])) {
+                    if (empty($palet['bahan_baku_id'])) {
                         continue;
                     }
 
-                    $product = Product::find($palet['product_id']);
                     $jumlahBox = $palet['jumlah_box'] ?? null;
                     $jumlahPack = null;
 
                     if (
-                        $product &&
-                        $product->pack_per_box !== null &&
+                        $batchProduct &&
+                        $batchProduct->pack_per_box !== null &&
                         $jumlahBox !== null
                     ) {
-                        $jumlahPack = $product->pack_per_box * $jumlahBox;
+                        $jumlahPack = $batchProduct->pack_per_box * $jumlahBox;
                     }
 
                     PackingLuarPalet::create([
                         'packing_luar_id' => $packingLuar->id,
-                        'product_id' => $palet['product_id'],
+                        'bahan_baku_id' => $palet['bahan_baku_id'],
                         'no_palet' => $palet['no_palet'] ?? ($index + 1),
                         'jumlah_pack' => $jumlahPack,
                         'jumlah_box' => $jumlahBox,
@@ -550,32 +484,24 @@ class PackingLuarController extends Controller
                 }
             }
 
-            // Hitung ulang Yield Production Batch
             $productionBatch = ProductionBatch::with([
                 'productions',
                 'packingLuars.palets',
                 'kemasanRijeks',
             ])->findOrFail($request->production_batch_id);
 
-            $grandTotalBahanBaku = $productionBatch->productions
-                ->sum('total_bahan_baku');
+            $grandTotalBahanBaku = $productionBatch->productions->sum('total_bahan_baku');
 
             $totalKgPackingLuarPalet = $productionBatch->packingLuars
                 ->sum(function ($packingLuar) {
                     return $packingLuar->palets->sum('jumlah_kg');
                 });
 
-            $totalRijekPacking = $productionBatch->kemasanRijeks
-                ->sum('total_rijek_packing_kg');
+            $totalRijekPacking = $productionBatch->kemasanRijeks->sum('total_rijek_packing_kg');
 
-            if ($grandTotalBahanBaku > 0) {
-                $productionBatch->yield = (
-                    ($totalKgPackingLuarPalet + $totalRijekPacking)
-                    / $grandTotalBahanBaku
-                ) * 100;
-            } else {
-                $productionBatch->yield = 0;
-            }
+            $productionBatch->yield = $grandTotalBahanBaku > 0
+                ? (($totalKgPackingLuarPalet + $totalRijekPacking) / $grandTotalBahanBaku) * 100
+                : 0;
 
             $productionBatch->save();
         });
@@ -588,7 +514,6 @@ class PackingLuarController extends Controller
     public function destroy($id)
     {
         $packingLuar = PackingLuar::findOrFail($id);
-
         $packingLuar->delete();
 
         return redirect()

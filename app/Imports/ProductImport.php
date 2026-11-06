@@ -3,8 +3,6 @@
 namespace App\Imports;
 
 use App\Models\Product;
-use App\Models\ProductGroup;
-use App\Models\ProcessType;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -27,8 +25,6 @@ class ProductImport implements ToCollection, WithHeadingRow
             'nama_produk',
             'gramasi',
             'pack_per_box',
-            'nama_produk_grup',
-            'nama_process_type',
         ];
 
         $headers = array_keys($rows->first()->toArray());
@@ -42,14 +38,12 @@ class ProductImport implements ToCollection, WithHeadingRow
         }
 
         foreach ($rows as $row) {
-            $kodeProduct = trim($row['kode_produk'] ?? '');
+            $kode = trim($row['kode_produk'] ?? '');
             $nama = trim($row['nama_produk'] ?? '');
             $gramasi = $row['gramasi'] ?? null;
             $packPerBox = $row['pack_per_box'] ?? null;
-            $groupName = trim($row['nama_produk_grup'] ?? '');
-            $processTypeName = trim($row['nama_process_type'] ?? '');
 
-            if (empty($kodeProduct) && empty($nama)) {
+            if (empty($kode) && empty($nama)) {
                 continue;
             }
 
@@ -71,29 +65,15 @@ class ProductImport implements ToCollection, WithHeadingRow
                 $packPerBox = (int) $packPerBox;
             }
 
-            $productGroup = null;
-
-            if (!empty($groupName)) {
-                $productGroup = ProductGroup::where('name', $groupName)->first();
-            }
-
-            $processType = null;
-
-            if (!empty($processTypeName)) {
-                $processType = ProcessType::where('name', $processTypeName)->first();
-            }
-
-            if (!empty($kodeProduct)) {
+            if (!empty($kode)) {
                 Product::updateOrCreate(
                     [
-                        'kode_product' => $kodeProduct,
+                        'kode' => $kode,
                     ],
                     [
                         'nama' => $nama,
                         'gramasi' => $gramasi,
                         'pack_per_box' => $packPerBox,
-                        'product_group_id' => $productGroup?->id,
-                        'process_type_id' => $processType?->id,
                     ]
                 );
             } else {
@@ -103,17 +83,13 @@ class ProductImport implements ToCollection, WithHeadingRow
                     $product->update([
                         'gramasi' => $gramasi,
                         'pack_per_box' => $packPerBox,
-                        'product_group_id' => $productGroup?->id,
-                        'process_type_id' => $processType?->id,
                     ]);
                 } else {
                     Product::create([
-                        'kode_product' => null,
+                        'kode' => null,
                         'nama' => $nama,
                         'gramasi' => $gramasi,
                         'pack_per_box' => $packPerBox,
-                        'product_group_id' => $productGroup?->id,
-                        'process_type_id' => $processType?->id,
                     ]);
                 }
             }

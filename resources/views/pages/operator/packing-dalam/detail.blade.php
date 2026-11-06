@@ -765,15 +765,15 @@
                                             </td>
 
                                             <td>
-                                                @if ($plastik->product)
+                                                @if ($plastik->bahanBaku)
                                                     <strong>
-                                                        {{ $plastik->product->kode_product ?? '-' }}
+                                                        {{ $plastik->bahanBaku->kode ?? '-' }}
                                                     </strong>
 
                                                     <br>
 
                                                     <small class="text-muted">
-                                                        {{ $plastik->product->nama ?? '-' }}
+                                                        {{ $plastik->bahanBaku->name ?? '-' }}
                                                     </small>
                                                 @else
                                                     -

@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('packing_luar_id')
                 ->constrained('packing_luars')
                 ->cascadeOnDelete();
-            $table->foreignId('product_id')
-                ->constrained('products')
+            $table->foreignId('bahan_baku_id')
+                ->constrained('bahan_bakus')
                 ->restrictOnDelete();
             $table->unsignedInteger('no_palet');
             $table->unsignedInteger('jumlah_pack')->nullable();

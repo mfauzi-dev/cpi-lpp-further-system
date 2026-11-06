@@ -294,17 +294,17 @@ class LaporanPengendalianProdukDepanSheet implements
         $row++;
 
         $spans = [
-            ['A', 'C'],
-            ['D', 'F'],
-            ['G', 'H'],
-            ['I', 'N']
+            ['A', 'D'],
+            ['E', 'G'],
+            ['H', 'J'],
+            ['K', 'N'],
         ];
 
         $headers = [
-            'PRODUCT',
+            'BAHAN BAKU',
+            'FORMULA',
             'KODE BATCH',
-            'SUHU',
-            'BERAT'
+            'KETERANGAN',
         ];
 
         foreach ($headers as $i => $label) {
@@ -320,9 +320,9 @@ class LaporanPengendalianProdukDepanSheet implements
 
         $row++;
 
-        $productions = $this->productionBatch->productions;
+        $produksiBahanBakus = $this->productionBatch->produksiBahanBakus;
 
-        if ($productions->isEmpty()) {
+        if ($produksiBahanBakus->isEmpty()) {
             $this->emptyBlockRow($sheet, $row, 'A', 'N');
 
             $row++;
@@ -330,10 +330,10 @@ class LaporanPengendalianProdukDepanSheet implements
             return $row + 1;
         }
 
-        foreach ($productions as $production) {
-            $details = $production->details;
+        foreach ($produksiBahanBakus as $produksiBahanBaku) {
+            $items = $produksiBahanBaku->items;
 
-            if ($details->isEmpty()) {
+            if ($items->isEmpty()) {
                 $sheet->mergeCells("A{$row}:N{$row}");
                 $sheet->setCellValue("A{$row}", 'Tidak ada detail');
 
@@ -343,12 +343,12 @@ class LaporanPengendalianProdukDepanSheet implements
 
                 $row++;
             } else {
-                foreach ($details as $detail) {
+                foreach ($items as $item) {
                     $values = [
-                        $detail->product->nama ?? '-',
-                        $detail->kode_batch ?? '-',
-                        $this->number($detail->suhu),
-                        $this->number($detail->berat_kg) . ' Kg',
+                        $item->bahanBaku->name ?? '-',
+                        $item->productFormula->name ?? '-',
+                        $item->kode_batch ?? '-',
+                        $item->keterangan ?? '-',
                     ];
 
                     foreach ($values as $i => $value) {
@@ -366,21 +366,18 @@ class LaporanPengendalianProdukDepanSheet implements
                 }
             }
 
-            $sumTotal = $production->sum_total;
-
-            if ($sumTotal === null || $sumTotal === '') {
-                $sumTotal = $details->sum(
-                    fn ($d) => (float) ($d->berat_kg ?? 0)
-                );
-            }
-
             $sheet->mergeCells("A{$row}:H{$row}");
-            $sheet->setCellValue("A{$row}", 'SUM TOTAL');
+            $sheet->setCellValue(
+                "A{$row}",
+                'TOTAL / PENGGUNAAN / SISA'
+            );
 
             $sheet->mergeCells("I{$row}:N{$row}");
             $sheet->setCellValue(
                 "I{$row}",
-                $this->number($sumTotal) . ' Kg'
+                $this->number($produksiBahanBaku->total) . ' / ' .
+                $this->number($produksiBahanBaku->penggunaan) . ' / ' .
+                $this->number($produksiBahanBaku->sisa) . ' Kg'
             );
 
             $sheet->getStyle("A{$row}:N{$row}")
@@ -871,21 +868,8 @@ class LaporanPengendalianProdukDepanSheet implements
 
     protected function grandTotalProduction(): float
     {
-        $grandTotal = 0;
-
-        foreach ($this->productionBatch->productions as $production) {
-            $sumTotal = $production->sum_total;
-
-            if ($sumTotal === null || $sumTotal === '') {
-                $sumTotal = $production->details->sum(
-                    fn ($d) => (float) ($d->berat_kg ?? 0)
-                );
-            }
-
-            $grandTotal += (float) $sumTotal;
-        }
-
-        return $grandTotal;
+        return (float) $this->productionBatch->produksiBahanBakus
+            ->sum(fn ($produksiBahanBaku) => (float) ($produksiBahanBaku->total ?? 0));
     }
 
     protected function suhuRuangs(): array
